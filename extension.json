@@ -1,0 +1,578 @@
+{
+  "displayName": "Vimeo Playback",
+  "name": "vimeo-playback",
+  "platform": "web",
+  "version": "2.4.0",
+  "description": "The most full-featured extension for tracking playback of all of your Vimeo videos! Rich set of events and data elements for building your Rules. Supports dynamic loading of Vimeo players. Control loading of Vimeo's SDK.",
+  "author": {
+    "name": "Yuhui",
+    "url": "https://yuhui.sg",
+    "email": "dev@yuhui.sg"
+  },
+  "exchangeUrl": "https://exchange.adobe.com/apps/ec/108937",
+  "iconPath": "vimeo-playback-icon.svg",
+  "viewBasePath": "src/view/",
+  "configuration": {
+    "viewPath": "configuration/configuration.html",
+    "schema": {
+      "$schema": "http://json-schema.org/draft-04/schema#",
+      "type": "object",
+      "properties": {},
+      "additionalProperties": false
+    }
+  },
+  "events": [
+    {
+      "displayName": "Playback Rate Changed",
+      "name": "playback-rate-changed",
+      "categoryName": "Video playback",
+      "schema": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "libPath": "src/lib/events/playbackRateChanged.js",
+      "viewPath": "events/playbackRateChanged.html"
+    },
+    {
+      "displayName": "Player Error",
+      "name": "player-error",
+      "categoryName": "Player",
+      "schema": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "libPath": "src/lib/events/playerError.js",
+      "viewPath": "events/playerError.html"
+    },
+    {
+      "displayName": "Player Ready",
+      "name": "player-ready",
+      "categoryName": "Player",
+      "schema": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "libPath": "src/lib/events/playerReady.js",
+      "viewPath": "events/playerReady.html"
+    },
+    {
+      "displayName": "Player Removed",
+      "name": "player-removed",
+      "categoryName": "Player",
+      "schema": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "libPath": "src/lib/events/playerRemoved.js",
+      "viewPath": "events/playerRemoved.html"
+    },
+    {
+      "displayName": "Video Buffer Ended",
+      "name": "video-buffer-ended",
+      "categoryName": "Video status",
+      "schema": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "libPath": "src/lib/events/videoBufferEnded.js",
+      "viewPath": "events/videoBufferEnded.html"
+    },
+    {
+      "displayName": "Video Buffer Started",
+      "name": "video-buffer-started",
+      "categoryName": "Video status",
+      "schema": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "libPath": "src/lib/events/videoBufferStarted.js",
+      "viewPath": "events/videoBufferStarted.html"
+    },
+    {
+      "displayName": "Video Cued",
+      "name": "video-cued",
+      "categoryName": "Video status",
+      "schema": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "libPath": "src/lib/events/videoCued.js",
+      "viewPath": "events/videoCued.html"
+    },
+    {
+      "displayName": "Video Ended",
+      "name": "video-ended",
+      "categoryName": "Video status",
+      "schema": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "libPath": "src/lib/events/videoEnded.js",
+      "viewPath": "events/videoEnded.html"
+    },
+    {
+      "displayName": "Video Loaded",
+      "name": "video-loaded",
+      "categoryName": "Video status",
+      "schema": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "libPath": "src/lib/events/videoLoaded.js",
+      "viewPath": "events/videoLoaded.html"
+    },
+    {
+      "displayName": "Video Milestone",
+      "name": "video-milestone",
+      "categoryName": "Video status",
+      "schema": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "type": "object",
+        "properties": {
+          "fixedMilestoneAmounts": {
+            "description": "List of fixed milestone interval(s) to track",
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "fixedMilestoneUnit": {
+            "description": "Unit type of the fixed milestone(s) to track",
+            "type": "string",
+            "enum": [ "percent", "seconds" ],
+            "default": "percent"
+          }
+        }
+      },
+      "libPath": "src/lib/events/videoMilestone.js",
+      "viewPath": "events/videoMilestone.html"
+    },
+    {
+      "displayName": "Video Paused",
+      "name": "video-paused",
+      "categoryName": "Video status",
+      "schema": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "libPath": "src/lib/events/videoPaused.js",
+      "viewPath": "events/videoPaused.html"
+    },
+    {
+      "displayName": "Video Playing",
+      "name": "video-playing",
+      "categoryName": "Video status",
+      "schema": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "type": "object",
+        "properties": {
+          "doNotTrack": {
+            "description": "Whether to ignore tracking when a video is playing",
+            "type": "string",
+            "enum": [ "", "no", "yes" ],
+            "default": "yes"
+          },
+          "trackReplayed": {
+            "description": "Whether to track when a video has been replayed after it had ended",
+            "type": "string",
+            "enum": [ "", "no", "yes" ],
+            "default": "yes"
+          },
+          "trackResumed": {
+            "description": "Whether to track when a video has resumed playing after it had stopped",
+            "type": "string",
+            "enum": [ "", "no", "yes" ],
+            "default": "yes"
+          },
+          "trackStarted": {
+            "description": "Whether to track when a video has started playing",
+            "type": "string",
+            "enum": [ "", "no", "yes" ],
+            "default": "yes"
+          }
+        }
+      },
+      "libPath": "src/lib/events/videoPlaying.js",
+      "viewPath": "events/videoPlaying.html"
+    },
+    {
+      "displayName": "Video Progress",
+      "name": "video-progress",
+      "categoryName": "Video status",
+      "schema": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "libPath": "src/lib/events/videoProgress.js",
+      "viewPath": "events/videoProgress.html"
+    },
+    {
+      "displayName": "Video Seeked",
+      "name": "video-seeked",
+      "categoryName": "Video status",
+      "schema": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "libPath": "src/lib/events/videoSeeked.js",
+      "viewPath": "events/videoSeeked.html"
+    },
+    {
+      "displayName": "Video Time Updated",
+      "name": "video-time-updated",
+      "categoryName": "Video status",
+      "schema": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "libPath": "src/lib/events/videoTimeUpdated.js",
+      "viewPath": "events/videoTimeUpdated.html"
+    },
+    {
+      "displayName": "Video Volume Changed",
+      "name": "video-volume-changed",
+      "categoryName": "Video status",
+      "schema": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "libPath": "src/lib/events/videoVolumeChanged.js",
+      "viewPath": "events/videoVolumeChanged.html"
+    }
+  ],
+  "actions": [
+    {
+      "displayName": "Enable video playback tracking",
+      "name": "enable-video-playback-tracking",
+      "schema": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "type": "object",
+        "properties": {
+          "elementSpecificity": {
+            "description": "Whether to enable all Vimeo players or specific ones",
+            "type": "string",
+            "enum": [ "any", "specific" ],
+            "default": "any"
+          },
+          "elementsSelector": {
+            "description": "Selector to use to match specific Vimeo players",
+            "type": "string"
+          },
+          "loadVimeoPlayerSdk": {
+            "description": "Whether to load the Vimeo Player SDK if it hasn't been loaded yet",
+            "type": "string",
+            "enum": [ "", "no", "yes" ],
+            "default": "yes"
+          }
+        }
+      },
+      "libPath": "src/lib/actions/enableVideoPlaybackTracking.js",
+      "viewPath": "actions/enableVideoPlaybackTracking.html"
+    },
+    {
+      "displayName": "Load Vimeo Player SDK Script",
+      "name": "load-vimeo-iframe-api-script",
+      "schema": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "libPath": "src/lib/actions/loadVimeoPlayerSdkScript.js",
+      "viewPath": "actions/loadVimeoPlayerSdkScript.html"
+    }
+  ],
+  "dataElements": [
+    {
+      "displayName": "Error Message",
+      "name": "error-message",
+      "categoryName": "Player Error",
+      "schema": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "libPath": "src/lib/dataElements/errorMessage.js",
+      "viewPath": "dataElements/errorMessage.html"
+    },
+    {
+      "displayName": "Error Method",
+      "name": "error-method",
+      "categoryName": "Player Error",
+      "schema": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "libPath": "src/lib/dataElements/errorMethod.js",
+      "viewPath": "dataElements/errorMethod.html"
+    },
+    {
+      "displayName": "Error Name",
+      "name": "error-name",
+      "categoryName": "Player Error",
+      "schema": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "libPath": "src/lib/dataElements/errorName.js",
+      "viewPath": "dataElements/errorName.html"
+    },
+    {
+      "displayName": "Player Autopaused",
+      "name": "player-autopaused",
+      "categoryName": "Player",
+      "schema": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "libPath": "src/lib/dataElements/playerAutopaused.js",
+      "viewPath": "dataElements/playerAutopaused.html"
+    },
+    {
+      "displayName": "Player Colour",
+      "name": "player-colour",
+      "categoryName": "Player",
+      "schema": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "libPath": "src/lib/dataElements/playerColour.js",
+      "viewPath": "dataElements/playerColour.html"
+    },
+    {
+      "displayName": "Player State",
+      "name": "player-state",
+      "categoryName": "Player",
+      "schema": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "libPath": "src/lib/dataElements/playerState.js",
+      "viewPath": "dataElements/playerState.html"
+    },
+    {
+      "displayName": "Video Current Time",
+      "name": "video-current-time",
+      "categoryName": "Video playback",
+      "schema": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "libPath": "src/lib/dataElements/videoCurrentTime.js",
+      "viewPath": "dataElements/videoCurrentTime.html"
+    },
+    {
+      "displayName": "Video Duration",
+      "name": "video-duration",
+      "categoryName": "Video playback",
+      "schema": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "libPath": "src/lib/dataElements/videoDuration.js",
+      "viewPath": "dataElements/videoDuration.html"
+    },
+    {
+      "displayName": "Video ID",
+      "name": "video-id",
+      "categoryName": "Video playback",
+      "schema": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "libPath": "src/lib/dataElements/videoId.js",
+      "viewPath": "dataElements/videoId.html"
+    },
+    {
+      "displayName": "Video Loaded Fraction",
+      "name": "video-loaded-fraction",
+      "categoryName": "Video playback",
+      "schema": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "libPath": "src/lib/dataElements/videoLoadedFraction.js",
+      "viewPath": "dataElements/videoLoadedFraction.html"
+    },
+    {
+      "displayName": "Video Looped",
+      "name": "video-looped",
+      "categoryName": "Video playback",
+      "schema": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "libPath": "src/lib/dataElements/videoLooped.js",
+      "viewPath": "dataElements/videoLooped.html"
+    },
+    {
+      "displayName": "Video Milestone",
+      "name": "video-milestone",
+      "categoryName": "Video playback",
+      "schema": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "libPath": "src/lib/dataElements/videoMilestone.js",
+      "viewPath": "dataElements/videoMilestone.html"
+    },
+    {
+      "displayName": "Video Muted",
+      "name": "video-muted",
+      "categoryName": "Video playback",
+      "schema": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "libPath": "src/lib/dataElements/videoMuted.js",
+      "viewPath": "dataElements/videoMuted.html"
+    },
+    {
+      "displayName": "Video Playback Rate",
+      "name": "video-playback-rate",
+      "categoryName": "Video playback",
+      "schema": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "libPath": "src/lib/dataElements/videoPlaybackRate.js",
+      "viewPath": "dataElements/videoPlaybackRate.html"
+    },
+    {
+      "displayName": "Video Played Segment Time",
+      "name": "video-played-segment-time",
+      "categoryName": "Video playback",
+      "schema": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "libPath": "src/lib/dataElements/videoPlayedSegmentTime.js",
+      "viewPath": "dataElements/videoPlayedSegmentTime.html"
+    },
+    {
+      "displayName": "Video Played Total Time",
+      "name": "video-played-total-time",
+      "categoryName": "Video playback",
+      "schema": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "libPath": "src/lib/dataElements/videoPlayedTotalTime.js",
+      "viewPath": "dataElements/videoPlayedTotalTime.html"
+    },
+    {
+      "displayName": "Video Title",
+      "name": "video-title",
+      "categoryName": "Video playback",
+      "schema": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "libPath": "src/lib/dataElements/videoTitle.js",
+      "viewPath": "dataElements/videoTitle.html"
+    },
+    {
+      "displayName": "Video Type",
+      "name": "video-type",
+      "categoryName": "Video playback",
+      "schema": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "libPath": "src/lib/dataElements/videoType.js",
+      "viewPath": "dataElements/videoType.html"
+    },
+    {
+      "displayName": "Video URL",
+      "name": "video-url",
+      "categoryName": "Video playback",
+      "schema": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "libPath": "src/lib/dataElements/videoUrl.js",
+      "viewPath": "dataElements/videoUrl.html"
+    },
+    {
+      "displayName": "Video Volume",
+      "name": "video-volume",
+      "categoryName": "Video playback",
+      "schema": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "libPath": "src/lib/dataElements/videoVolume.js",
+      "viewPath": "dataElements/videoVolume.html"
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "name": "launchext-vimeo-playback",
+  "version": "2.4.0",
+  "description": "The most full-featured extension for tracking playback of all of your Vimeo videos! Rich set of events and data elements for building your Rules. Supports dynamic loading of Vimeo players. Control loading of Vimeo's API.",
+  "author": "Yuhui",
+  "license": "GPL-3.0-or-later",
+  "main": "main.js",
+  "devDependencies": {
+    "@adobe/reactor-packager": "^4.2.0",
+    "@adobe/reactor-releaser": "^3.0.4",
+    "@adobe/reactor-sandbox": "^12.4.0",
+    "@adobe/reactor-uploader": "^5.0.9",
+    "eslint": "^8.23.0",
+    "jasmine": "^4.4.0",
+    "proxyquire": "^2.1.3"
+  },
+  "scripts": {
+    "test": "jasmine"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yuhui/launchext-vimeo-playback.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yuhui/launchext-vimeo-playback/issues"
+  },
+  "homepage": "https://github.com/yuhui/launchext-vimeo-playback#readme"
+}

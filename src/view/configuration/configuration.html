@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Vimeo Playback Extension Configuration</title>
+    <link rel="stylesheet" href="https://unpkg.com/@adobe/coral-spectrum@4.5.0/dist/css/coral.min.css">
+    <link rel="stylesheet" href="../stylesheets/style.css">
+    <script src="https://unpkg.com/@adobe/coral-spectrum@4.5.0/dist/js/coral.min.js" data-coral-icons-external="js"></script>
+  </head>
+  <body class="coral--light coral-Body--S u-coral-margin">
+    <h3 class="coral-Heading--M">No configuration necessary</h3>
+
+    <section class="coral-Well">
+      <h4 class="coral-Heading--S coral-Heading--light">How this Extension works</h4>
+      <ol>
+        <li class="coral-List-item">
+          Create a new Rule or open an existing Rule, for example, one with a "Window Loaded"
+          Event.
+        </li>
+        <li class="coral-List-item">
+          <i>(optional)</i> Add the <span class="text-underline">"Load Vimeo Player SDK
+          script"</span> Action.
+        </li>
+        <li class="coral-List-item">
+          <b>Add the <span class="text-underline">"Enable video playback tracking"</span>
+          Action.</b><br />
+          If the "Load Vimeo Player SDK script" Action was not used, then this Action allows you
+          to load the Vimeo Player SDK script.
+        </li>
+      </ol>
+      <p>
+        <b>Then add the appropriate Events in your Rules to track Vimeo video playback
+        interactions.</b><br />
+        Refer to each Event's table of Data Elements that you can use in your Rules' Conditions
+        and Actions.
+      </p>
+      <p>
+        <b>Use the appropriate Data Elements in your Rules to retrieve data about the Vimeo
+          video playback interactions, like the player's state, current time, video URL,
+          etc.</b><br />
+        More information is available when setting up the Data Element.
+      </p>
+    </section>
+
+    <div id="messaging"></div>
+
+    <hr class="coral-Divider--S">
+
+    <footer class="coral--lightest coral-Body--XS">
+      <div id="donations">
+        <p>
+          Donate: <a class="coral-Link" href="https://paypal.me/yuhuibc" target="_blank">PayPal</a>
+        </p>
+      </div>
+      <div id="support">
+        <p>
+          Support Information
+        </p>
+        <ul class="coral-List">
+          <li class="coral-List-item">
+            <a class="coral-Link" href="https://github.com/yuhui/launchext-vimeo-playback/issues" target="_blank">
+              Open a ticket
+            </a>
+          </li>
+          <li class="coral-List-item">
+            <a class="coral-Link" href="https://github.com/yuhui/launchext-vimeo-playback/blob/master/CHANGELOG.md" target="_blank">
+              Read change log
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <p>
+        Copyright &copy; 2022 Yuhui. All rights reserved.
+      </p>
+      <p>
+        <a class="coral-Link" href="https://yuhui.sg/terms-of-service.html" target="_blank">Terms of Service</a> |
+        <a class="coral-Link" href="https://yuhui.sg/privacy-policy.html" target="_blank">Privacy Policy</a> |
+        <a class="coral-Link" href="https://yuhui.sg/cookie-policy.html" target="_blank">Cookie Policy</a> |
+        <a class="coral-Link" href="https://yuhui.sg/acceptable-use-policy.html" target="_blank">Acceptable Use Policy</a>
+      </p>
+    </footer>
+
+    <script src="https://assets.adobedtm.com/activation/reactor/extensionbridge/extensionbridge.min.js"></script>
+    <script src="../scripts/common.js"></script>
+    <script>
+      window.extensionBridge.register({
+        init: (info) => {
+          if (info.settings) {}
+        },
+
+        getSettings: () => {
+          return {};
+        },
+
+        validate: () => {
+          return true;
+        }
+      });
+    </script>
+  </body>
+</html>
