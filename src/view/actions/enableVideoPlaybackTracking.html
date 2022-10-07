@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Enable Vimeo Video Playback Tracking</title>
+    <link rel="stylesheet" href="https://unpkg.com/@adobe/coral-spectrum@4.5.0/dist/css/coral.min.css">
+    <link rel="stylesheet" href="../stylesheets/style.css">
+    <script src="https://unpkg.com/@adobe/coral-spectrum@4.5.0/dist/js/coral.min.js" data-coral-icons-external="js"></script>
+  </head>
+  <body class="coral--light coral-Body--S u-coral-margin">
+    <form id="action-configuration" class="coral-Form">
+      <h3 class="coral-Heading--M">Enable Video Playback Tracking</h3>
+
+      <coral-alert variant="warning">
+        <coral-alert-header>
+          Important!
+        </coral-alert-header>
+        <coral-alert-content>
+          Ensure that the Vimeo video player is loaded in your users' browsers <i>before</i> this
+          Action runs.
+        </coral-alert-content>
+      </coral-alert>
+
+      <div id="element-specificity-container" class="coral-FormGroup-item">
+        <label class="coral-FormGroup-itemLabel coral-FieldLabel--left">
+          Use this extension with
+          <coral-icon icon="Asterisk" class="coral-FieldLabel-requiredIcon" size="XXS" alt="required"></coral-icon>
+        </label>
+        <coral-radiogroup orientation="vertical">
+          <coral-radio name="elementSpecificity" value="any" checked="">
+            any player
+          </coral-radio>
+          <coral-radio name="elementSpecificity" value="specific">
+            specific players
+          </coral-radio>
+        </coral-radiogroup>
+      </div>
+
+      <div id="elements-selector-container" class="coral-FormGroup-item hide">
+        <label for="elements-selector" class="coral-FormGroup-itemLabel coral-FieldLabel--left">
+          Players matching the CSS selector
+        </label>
+        <div class="coral-InputGroup" style="width: 100%;" role="presentation">
+          <input id="elements-selector" name="elementsSelector" value="" class="coral-InputGroup-input" is="coral-textfield" placeholder="CSS selector of specific players">
+          <span class="coral-InputGroup-button">
+            <button is="coral-button" icon="data" title="Data Element selector"></button>
+          </span>
+          <span style="margin-left: 1em; white-space: nowrap;">
+            <a class="coral-Link" href="https://developer.mozilla.org/en-US/docs/Learn/CSS/Introduction_to_CSS/Selectors" rel="noopener noreferrer" target="_blank">
+              Learn more
+            </a>
+          </span>
+        </div>
+        <coral-alert>
+          <coral-alert-header>
+            Important!
+          </coral-alert-header>
+          <coral-alert-content>
+            Only the players that match this CSS selector will be able to work with the Vimeo
+            playback events provided by this extension.
+          </coral-alert-content>
+        </coral-alert>
+      </div>
+
+      <div id="load-vimeo-player-sdk-container">
+        <div class="coral-FormGroup-item">
+          <coral-checkboxgroup orientation="vertical">
+            <coral-checkbox name="loadVimeoPlayerSdk" value="yes" checked="">
+              Load Vimeo Player SDK script if it hasn't been loaded yet.
+            </coral-checkbox>
+            Uncheck this box if you want to control when the Vimeo Player SDK script is
+            loaded, for example, after the user has given consent. (In that case, use the "Load
+            Vimeo Player SDK script" Action.) If you are not sure, leave this checkbox as
+            checked.
+          </coral-checkboxgroup>
+        </div>
+      </div>
+    </form>
+
+    <section class="coral-Well">
+      <h4 class="coral-Heading--S coral-Heading--light">How this Action works</h4>
+      <p>
+        When this Action runs, it sets up the Vimeo players to work with the Vimeo Player SDK.
+        This detects the video playback interactions so that they can be tracked.
+      </p>
+      <p>
+        This Action should be run every time Vimeo players are loaded into the web page. For
+        example:
+      </p>
+      <ul class="coral-List">
+        <li class="coral-List-item">with the Core extension's "Window Loaded" Event</li>
+        <li class="coral-List-item">when a button is clicked to load the Vimeo player(s)</li>
+        <li class="coral-List-item">etc.</li>
+      </ul>
+    </section>
+
+    <div id="messaging"></div>
+
+    <hr class="coral-Divider--S">
+
+    <footer class="coral--lightest coral-Body--XS">
+      <div id="donations">
+        <p>
+          Donate: <a class="coral-Link" href="https://paypal.me/yuhuibc" target="_blank">PayPal</a>
+        </p>
+      </div>
+      <div id="support">
+        <p>
+          Support Information
+        </p>
+        <ul class="coral-List">
+          <li class="coral-List-item">
+            <a class="coral-Link" href="https://github.com/yuhui/launchext-vimeo-playback/issues" target="_blank">
+              Open a ticket
+            </a>
+          </li>
+          <li class="coral-List-item">
+            <a class="coral-Link" href="https://github.com/yuhui/launchext-vimeo-playback/blob/master/CHANGELOG.md" target="_blank">
+              Read change log
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <p>
+        Copyright &copy; 2022 Yuhui. All rights reserved.
+      </p>
+      <p>
+        <a class="coral-Link" href="https://yuhui.sg/terms-of-service.html" target="_blank">Terms of Service</a> |
+        <a class="coral-Link" href="https://yuhui.sg/privacy-policy.html" target="_blank">Privacy Policy</a> |
+        <a class="coral-Link" href="https://yuhui.sg/cookie-policy.html" target="_blank">Cookie Policy</a> |
+        <a class="coral-Link" href="https://yuhui.sg/acceptable-use-policy.html" target="_blank">Acceptable Use Policy</a>
+      </p>
+    </footer>
+
+    <script src="https://assets.adobedtm.com/activation/reactor/extensionbridge/extensionbridge.min.js"></script>
+    <script src="../scripts/common.js"></script>
+    <script>
+      const FORM_ID = 'action-configuration';
+
+      window.extensionBridge.register({
+        init: (info) => {
+          if (info.settings) {
+            if (info.settings.loadVimeoPlayerSdk === 'no') {
+              // rewrite this value to be a valid checkbox input value for "false" checked state
+              info.settings.loadVimeoPlayerSdk = '';
+            }
+
+            setFormValues(FORM_ID, info.settings);
+
+            toggleElement(
+              FORM_ID,
+              'elementSpecificity',
+              'specific',
+              '#elements-selector-container',
+            );
+          }
+        },
+
+        getSettings: () => {
+          const formValues = getFormValues(FORM_ID);
+
+          if (formValues.elementSpecificity === 'any') {
+            formValues.elementsSelector = '';
+          }
+
+          if (formValues.loadVimeoPlayerSdk === '') {
+            // rewrite this value so as not to deal with empty strings
+            formValues.loadVimeoPlayerSdk = 'no';
+          }
+
+          return formValues;
+        },
+
+        validate: () => {
+          const textFieldSelector = 'input[is="coral-textfield"]';
+          const textFieldInputs = document.querySelectorAll(textFieldSelector);
+          textFieldInputs.forEach((input) => {
+            input.removeAttribute('invalid');
+          });
+          const errorTextFieldSelector = `${textFieldSelector}[name="fieldName"]`;
+
+          const formValues = getFormValues(FORM_ID);
+          const { elementSpecificity, elementsSelector, loadVimeoPlayerSdk } = formValues;
+
+          const elementSpecificityIsValid = (
+            ['any', 'specific'].includes(elementSpecificity)
+          );
+
+          const elementsSelectorIsValid = elementSpecificity === 'any'
+            ? true
+            : elementsSelector.length > 0;
+          if (!elementsSelectorIsValid) {
+            const selector = errorTextFieldSelector.replace('fieldName', 'elementsSelector');
+            const errorTextFieldInputs = document.querySelectorAll(selector);
+            errorTextFieldInputs.forEach((input) => {
+              input.setAttribute('invalid', '');
+            });
+          }
+
+          const loadVimeoPlayerSdkIsValid = ['', 'yes'].includes(loadVimeoPlayerSdk);
+
+          return elementSpecificityIsValid
+            && elementsSelectorIsValid
+            && loadVimeoPlayerSdkIsValid;
+        }
+      });
+
+      /**
+       * When the data element selector coral-icon button is clicked,
+       * open Launch's data element selector,
+       * then set the coral-icon's nearest input with the selected data element.
+       */
+      const dataButtons = document.querySelectorAll('button[icon="data"]');
+      dataButtons.forEach((button) => {
+        button.addEventListener('click', (event) => {
+          const inputGroup = this.closest('div.coral-InputGroup');
+          const inputElement = inputGroup.querySelector('input');
+          window.extensionBridge.openDataElementSelector().then((dataElement) => {
+            inputElement.value = dataElement;
+          });
+        });
+      });
+
+      const elementSpecificityRadioSelector = '#element-specificity-container coral-radio';
+      const elementSpecificityRadios = document.querySelectorAll(elementSpecificityRadioSelector);
+      elementSpecificityRadios.forEach((radio) => {
+        radio.addEventListener('click', (event) => {
+          toggleElement(
+            FORM_ID,
+            'elementSpecificity',
+            'specific',
+            '#elements-selector-container',
+          );
+        });
+      });
+    </script>
+  </body>
+</html>

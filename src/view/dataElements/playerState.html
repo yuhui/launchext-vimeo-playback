@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Player State Data Element</title>
+    <link rel="stylesheet" href="https://unpkg.com/@adobe/coral-spectrum@4.5.0/dist/css/coral.min.css">
+    <link rel="stylesheet" href="../stylesheets/style.css">
+    <script src="https://unpkg.com/@adobe/coral-spectrum@4.5.0/dist/js/coral.min.js" data-coral-icons-external="js"></script>
+  </head>
+  <body class="coral--light coral-Body--S u-coral-margin">
+    <h3 class="coral-Heading--M">No configuration necessary</h3>
+
+    <section class="coral-Well">
+      <h4 class="coral-Heading--S coral-Heading--light">How this Data Element works</h4>
+      <p>
+        This Data Element returns the state of the Vimeo player. It corresponds to the Vimeo
+        Playback Event.
+      </p>
+
+      <p>
+        <b>This data element <span class="text-underline">must</span> be used with an Event from this
+          Vimeo Playback extension.</b>
+      </p>
+      <p>
+        How to use:
+      </p>
+      <ul class="coral-List">
+        <li class="coral-List-item"><code class="coral-Code--S">%data element name%</code></li>
+        <li class="coral-List-item"><code class="coral-Code--S">_satellite.getVar('data element name', event)</code></li>
+      </ul>
+
+      <table is="coral-table" variant="quiet">
+        <colgroup>
+          <col is="coral-table-column" sortable="" sortabledirection="ascending">
+          <col is="coral-table-column">
+        </colgroup>
+        <thead is="coral-table-head">
+          <tr is="coral-table-row">
+            <th is="coral-table-headercell">When the Event is...</th>
+            <th is="coral-table-headercell">this Data Element's value is...</th>
+          </tr>
+        </thead>
+        <tbody is="coral-table-body">
+          <tr is="coral-table-row">
+            <td is="coral-table-cell" role="rowheader">
+              Player Ready
+            </td>
+            <td is="coral-table-cell">
+              <code class="coral-Code--S">player ready</code>
+            </td>
+          </tr>
+          <tr is="coral-table-row">
+            <td is="coral-table-cell" role="rowheader">
+              Player Removed
+            </td>
+            <td is="coral-table-cell">
+              <code class="coral-Code--S">player removed</code>
+            </td>
+          </tr>
+          <tr is="coral-table-row">
+            <td is="coral-table-cell" role="rowheader">
+              Player Error
+            </td>
+            <td is="coral-table-cell">
+              <code class="coral-Code--S">player error</code>
+            </td>
+          </tr>
+          <tr is="coral-table-row">
+            <td is="coral-table-cell" role="rowheader">
+              Video Loaded
+            </td>
+            <td is="coral-table-cell">
+              <code class="coral-Code--S">video loaded</code>
+            </td>
+          </tr>
+          <tr is="coral-table-row">
+            <td is="coral-table-cell" role="rowheader">
+              Video Buffer Started
+            </td>
+            <td is="coral-table-cell">
+              <code class="coral-Code--S">video buffer started</code>
+            </td>
+          </tr>
+          <tr is="coral-table-row">
+            <td is="coral-table-cell" role="rowheader">
+              Video Buffer Ended
+            </td>
+            <td is="coral-table-cell">
+              <code class="coral-Code--S">video buffer ended</code>
+            </td>
+          </tr>
+          <tr is="coral-table-row">
+            <td is="coral-table-cell" role="rowheader">
+              Video Cued
+            </td>
+            <td is="coral-table-cell">
+              <code class="coral-Code--S">video cued</code>
+            </td>
+          </tr>
+          <tr is="coral-table-row">
+            <td is="coral-table-cell" role="rowheader">
+              Video Playing
+            </td>
+            <td is="coral-table-cell">
+              <ul class="coral-List--condensed">
+                <li class="coral-List-item"><code class="coral-Code--S">video playing</code></li>
+                <li class="coral-List-item"><code class="coral-Code--S">video replayed</code></li>
+                <li class="coral-List-item"><code class="coral-Code--S">video resumed</code></li>
+                <li class="coral-List-item"><code class="coral-Code--S">video started</code></li>
+              </ul>
+              depending on the Event option.
+            </td>
+          </tr>
+          <tr is="coral-table-row">
+            <td is="coral-table-cell" role="rowheader">
+              Video Progress
+            </td>
+            <td is="coral-table-cell">
+              <code class="coral-Code--S">video progress</code>
+            </td>
+          </tr>
+          <tr is="coral-table-row">
+            <td is="coral-table-cell" role="rowheader">
+              Video Milestone
+            </td>
+            <td is="coral-table-cell">
+              <code class="coral-Code--S">video milestone</code>
+            </td>
+          </tr>
+          <tr is="coral-table-row">
+            <td is="coral-table-cell" role="rowheader">
+              Video Paused
+            </td>
+            <td is="coral-table-cell">
+              <code class="coral-Code--S">video paused</code>
+            </td>
+          </tr>
+          <tr is="coral-table-row">
+            <td is="coral-table-cell" role="rowheader">
+              Video Seeked
+            </td>
+            <td is="coral-table-cell">
+              <code class="coral-Code--S">video seeked</code>
+            </td>
+          </tr>
+          <tr is="coral-table-row">
+            <td is="coral-table-cell" role="rowheader">
+              Video Time Updated
+            </td>
+            <td is="coral-table-cell">
+              <code class="coral-Code--S">video time updated</code>
+            </td>
+          </tr>
+          <tr is="coral-table-row">
+            <td is="coral-table-cell" role="rowheader">
+              Video Volume Changed
+            </td>
+            <td is="coral-table-cell">
+              <code class="coral-Code--S">video volume changed</code>
+            </td>
+          </tr>
+          <tr is="coral-table-row">
+            <td is="coral-table-cell" role="rowheader">
+              Video Ended
+            </td>
+            <td is="coral-table-cell">
+              <code class="coral-Code--S">video ended</code>
+            </td>
+          </tr>
+          <tr is="coral-table-row">
+            <td is="coral-table-cell" role="rowheader">
+              Playback Rate Changed
+            </td>
+            <td is="coral-table-cell">
+              <code class="coral-Code--S">playback rate changed</code>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <div id="messaging"></div>
+
+    <hr class="coral-Divider--S">
+
+    <footer class="coral--lightest coral-Body--XS">
+      <div id="donations">
+        <p>
+          Donate: <a class="coral-Link" href="https://paypal.me/yuhuibc" target="_blank">PayPal</a>
+        </p>
+      </div>
+      <div id="support">
+        <p>
+          Support Information
+        </p>
+        <ul class="coral-List">
+          <li class="coral-List-item">
+            <a class="coral-Link" href="https://github.com/yuhui/launchext-vimeo-playback/issues" target="_blank">
+              Open a ticket
+            </a>
+          </li>
+          <li class="coral-List-item">
+            <a class="coral-Link" href="https://github.com/yuhui/launchext-vimeo-playback/blob/master/CHANGELOG.md" target="_blank">
+              Read change log
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <p>
+        Copyright &copy; 2022 Yuhui. All rights reserved.
+      </p>
+      <p>
+        <a class="coral-Link" href="https://yuhui.sg/terms-of-service.html" target="_blank">Terms of Service</a> |
+        <a class="coral-Link" href="https://yuhui.sg/privacy-policy.html" target="_blank">Privacy Policy</a> |
+        <a class="coral-Link" href="https://yuhui.sg/cookie-policy.html" target="_blank">Cookie Policy</a> |
+        <a class="coral-Link" href="https://yuhui.sg/acceptable-use-policy.html" target="_blank">Acceptable Use Policy</a>
+      </p>
+    </footer>
+
+    <script src="https://assets.adobedtm.com/activation/reactor/extensionbridge/extensionbridge.min.js"></script>
+    <script src="../scripts/common.js"></script>
+    <script>
+      window.extensionBridge.register({
+        init: (info) => {
+          if (info.settings) {}
+        },
+
+        getSettings: () => {
+          return {};
+        },
+
+        validate: () => {
+          return true;
+        }
+      });
+    </script>
+  </body>
+</html>

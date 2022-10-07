@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+
+<head lang="en">
+  <meta charset="UTF-8">
+  <meta name="template_version" content="2.0">
+  <title>Test page for Vimeo playback extension</title>
+  <script src="launch-EN00000000000000000000000000000000.js" async></script>
+  <script src="https://player.vimeo.com/api/player.js"></script>
+  <script>
+    function loadVideo() {
+      var player = new Vimeo.Player('player', {
+        id: '188673754',
+        width: '640',
+      });
+      player.on('ready', (data) => {
+        onPlayerReady(player, data);
+      });
+      player.on('play', (data) => {
+        onPlayerStateChange(player, data);
+      });
+    }
+    function onPlayerReady(player, data) {
+      console.log(`Player ${player.id} is ready`);
+    }
+    function onPlayerStateChange(player, data) {
+      console.log(`Player ${player.id} is playing, data: ${JSON.stringify(data)}`);
+    }
+  </script>
+</head>
+
+<body>
+  <h1>Reactor Extension Library Sandbox</h1>
+  <!-- video that is added by code -->
+  <p>Click anywhere in this page to enable the below video for tracking.</p>
+  <div id="player"></div>
+  <!-- video that is added by a user action -->
+  <p>
+    <span style="color:blue;text-decoration: underline;" onclick="showVideo();">Show video</span>
+    &nbsp;&nbsp;&nbsp;
+    <span style="color:blue;text-decoration: underline;" onclick="removeVideo();">Remove video</span>
+  </p>
+  <div id="dynamicPlayer"></div>
+  <iframe src="https://player.vimeo.com/video/184927785?h=61344bc509" width="640" height="360" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
+  <iframe src="https://player.vimeo.com/video/188673754?h=bf30de6224" width="640" height="360" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
+  <!--<iframe src="https://player.vimeo.com/video/373734651?h=1f17a9c17f" width="640" height="360" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>-->
+  <!-- live video -->
+  <!--<iframe src="https://player.vimeo.com/video/754078274?h=5d2999c91f&title=0&byline=0&portrait=0" width="640" height="360" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>-->
+  <script>
+    //loadVideo();
+
+    const VIDEO_ID = '417964548';
+    const HASH = '880f862e83';
+    const DYNAMIC_PLAYER = document.getElementById('dynamicPlayer');
+
+    function showVideo() {
+      let videoFrame = document.createElement('iframe');
+      videoFrame.setAttribute('width', '640');
+      videoFrame.setAttribute('height', '360');
+      videoFrame.setAttribute('src', `https://player.vimeo.com/video/${VIDEO_ID}?h=${HASH}`);
+      DYNAMIC_PLAYER.appendChild(videoFrame);
+    }
+
+    function removeVideo() {
+      DYNAMIC_PLAYER.removeChild(DYNAMIC_PLAYER.firstChild);
+    }
+  </script>
+</body>
+
+</html>
