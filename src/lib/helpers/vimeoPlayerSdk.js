@@ -568,7 +568,7 @@ var playerReady = function(event) {
   element.dataset.launchextSetup = PLAYER_SETUP_COMPLETED_STATUS;
 
   // update static metadata
-  Promise.all([
+  Promise.allSettled([
     player.getAutopause(),
     player.getColor(),
     player.getDuration(),
@@ -576,21 +576,44 @@ var playerReady = function(event) {
     player.getVideoHeight(),
     player.getVideoId(),
     player.getVideoTitle(),
-    player.getVideoUrl(),
     player.getVideoWidth(),
-    //player.getCurrentTime(),
-  ]).then(function(values) {
+    // special case: this throws an error if URL privacy is enabled by the video owner
+    player.getVideoUrl(),
+  ]).then(function(responses) {
     player.launchExt = player.launchExt || {};
 
-    player.launchExt.isAutopaused = values[0];
-    player.launchExt.playerColour = values[1];
-    player.launchExt.videoDuration = values[2];
-    player.launchExt.isVideoLooped = values[3];
-    player.launchExt.videoHeight = values[4];
-    player.launchExt.videoId = values[5];
-    player.launchExt.videoTitle = values[6];
-    player.launchExt.videoUrl = values[7] || ('https://vimeo.com/' + player.launchExt.videoId);
-    player.launchExt.videoWidth = values[8];
+    if (responses[0].status === 'fulfilled') {
+      player.launchExt.isAutopaused = responses[0].value;
+    }
+    if (responses[1].status === 'fulfilled') {
+      player.launchExt.playerColour = responses[1].value;
+    }
+    if (responses[2].status === 'fulfilled') {
+      player.launchExt.videoDuration = responses[2].value;
+    }
+    if (responses[3].status === 'fulfilled') {
+      player.launchExt.isVideoLooped = responses[3].value;
+    }
+    if (responses[4].status === 'fulfilled') {
+      player.launchExt.videoHeight = responses[4].value;
+    }
+    if (responses[5].status === 'fulfilled') {
+      player.launchExt.videoId = responses[5].value;
+    }
+    if (responses[6].status === 'fulfilled') {
+      player.launchExt.videoTitle = responses[6].value;
+    }
+    if (responses[7].status === 'fulfilled') {
+      player.launchExt.videoWidth = responses[7].value;
+    }
+
+    if (responses[8].status === 'fulfilled') {
+      player.launchExt.videoUrl = responses[8].value;
+    } else {
+      // error occurred, probably due to URL privacy being enabled by the video owner
+      logger.debug('Video privacy setting prevents URL from being read, using fallback method');
+      player.launchExt.videoUrl = 'https://vimeo.com/' + player.launchExt.videoId;
+    }
 
     var isLiveEvent = player.launchExt.videoDuration === 0;
     player.launchExt.isLiveEvent = isLiveEvent;
