@@ -1,3 +1,8 @@
+2.4.1 (released 7 November 2022)
+--------------------------------
+
+- Use fallback method to get the video URL when the video's privacy setting prevents the URL from being read.
+
 2.4.0 (released 7 October 2022)
 -------------------------------
 
