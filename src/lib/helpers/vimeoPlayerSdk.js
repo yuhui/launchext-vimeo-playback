@@ -104,6 +104,7 @@ var IFRAME_SELECTOR = 'iframe[src*=vimeo]';
 var MAXIMUM_ATTEMPTS_TO_WAIT_FOR_VIDEO_PLATFORM_API = 5;
 var PLAYER_SETUP_STARTED_STATUS = 'started';
 var PLAYER_SETUP_MODIFIED_STATUS = 'modified';
+var PLAYER_SETUP_UPDATING_STATUS = 'updating';
 var PLAYER_SETUP_COMPLETED_STATUS = 'completed';
 var VIDEO_PLATFORM = 'vimeo';
 var VIDEO_TYPE_LIVE = 'live';
@@ -706,6 +707,11 @@ var pendingPlayersRegistryHasPlayers = function() {
  * @param {DOMElement} element A Vimeo IFrame DOM element.
  */
 var setupPlayer = function(element) {
+  if (element.dataset.launchextSetup !== PLAYER_SETUP_MODIFIED_STATUS) {
+    return;
+  }
+  element.dataset.launchextSetup = PLAYER_SETUP_UPDATING_STATUS;
+
   // merge the triggers from all matching selectors into one
   var triggers = {};
   /**
@@ -940,7 +946,9 @@ var registerPlayers = function(settings) {
   elements.forEach(function(element, i) {
     // setup only those players that have NOT been setup by this extension
     switch (element.dataset.launchextSetup) {
+      case PLAYER_SETUP_STARTED_STATUS:
       case PLAYER_SETUP_COMPLETED_STATUS:
+      case PLAYER_SETUP_UPDATING_STATUS:
         break;
       case PLAYER_SETUP_MODIFIED_STATUS:
         registerPendingPlayer(element);
