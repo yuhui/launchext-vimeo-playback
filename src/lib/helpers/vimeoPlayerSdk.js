@@ -104,6 +104,7 @@ var IFRAME_SELECTOR = 'iframe[src*=vimeo]';
 var MAXIMUM_ATTEMPTS_TO_WAIT_FOR_VIDEO_PLATFORM_API = 5;
 var PLAYER_SETUP_STARTED_STATUS = 'started';
 var PLAYER_SETUP_MODIFIED_STATUS = 'modified';
+var PLAYER_SETUP_UPDATING_STATUS = 'updating';
 var PLAYER_SETUP_COMPLETED_STATUS = 'completed';
 var VIDEO_PLATFORM = 'vimeo';
 var VIDEO_TYPE_LIVE = 'live';
@@ -632,10 +633,48 @@ var playerReady = function(event) {
  * native Vimeo event, there is no Vimeo player object found at event.target. So a player needs
  * to be passed in for subsequent functions to utilise.
  *
- * @see registerVimeoPlayers()
+ * @see registerPlayers()
  */
 var playerRemoved = function(event, player) {
   processPlaybackEvent(PLAYER_REMOVED, player, event);
+};
+
+/**
+ * Check if the Vimeo IFrame Player API has been loaded.
+ */
+var vimeoPlayerSdkIsLoaded = function() {
+  return !!window.Vimeo;
+};
+
+/**
+ * Check if the Vimeo IFrame Player API has been loaded and is ready.
+ */
+var vimeoPlayerSdkIsReady = function() {
+  return vimeoPlayerSdkIsLoaded()
+    && !!window.Vimeo.Player
+    && Object.prototype.toString.call(window.Vimeo.Player) === '[object Function]';
+};
+
+/**
+ * Load the Vimeo IFrame Player API script asynchronously.
+ * Returns with an error log if the API script could not be loaded.
+ */
+var loadVimeoPlayerSdk = function() {
+  if (vimeoPlayerSdkIsLoaded()) {
+    /**
+     * The Vimeo Player SDK script had already been loaded elsewhere, e.g. in HTML
+     * so setup the Vimeo players immediately
+     */
+    setupPendingPlayers();
+  } else {
+    // Load the Vimeo Player SDK script, then setup the Vimeo players
+    loadScript(VIMEO_PLAYER_SDK_URL).then(function() {
+      logger.info('Vimeo Player SDK was loaded successfully');
+      setupPendingPlayers();
+    }, function() {
+      logger.error('Vimeo Player SDK could not be loaded');
+    });
+  }
 };
 
 /**
@@ -667,7 +706,12 @@ var pendingPlayersRegistryHasPlayers = function() {
  *
  * @param {DOMElement} element A Vimeo IFrame DOM element.
  */
-var setupVimeoPlayer = function(element) {
+var setupPlayer = function(element) {
+  if (element.dataset.launchextSetup !== PLAYER_SETUP_MODIFIED_STATUS) {
+    return;
+  }
+  element.dataset.launchextSetup = PLAYER_SETUP_UPDATING_STATUS;
+
   // merge the triggers from all matching selectors into one
   var triggers = {};
   /**
@@ -840,22 +884,6 @@ var setupVimeoPlayer = function(element) {
 };
 
 /**
- * Check if the Vimeo IFrame Player API has been loaded.
- */
-var vimeoPlayerSdkIsLoaded = function() {
-  return !!window.Vimeo;
-};
-
-/**
- * Check if the Vimeo IFrame Player API has been loaded and is ready.
- */
-var vimeoPlayerSdkIsReady = function() {
-  return vimeoPlayerSdkIsLoaded()
-    && !!window.Vimeo.Player
-    && Object.prototype.toString.call(window.Vimeo.Player) === '[object Function]';
-};
-
-/**
  * Setup Vimeo player elements to work with the Vimeo Player SDK.
  * Returns with an error log if Vimeo's YT object is unavailable.
  *
@@ -885,29 +913,7 @@ var setupPendingPlayers = function(attempt) {
 
   while (pendingPlayersRegistry.length > 0) {
     var playerElement = pendingPlayersRegistry.shift();
-    setupVimeoPlayer(playerElement);
-  }
-};
-
-/**
- * Load the Vimeo IFrame Player API script asynchronously.
- * Returns with an error log if the API script could not be loaded.
- */
-var loadVimeoPlayerSdk = function() {
-  if (vimeoPlayerSdkIsLoaded()) {
-    /**
-     * The Vimeo Player SDK script had already been loaded elsewhere, e.g. in HTML
-     * so setup the Vimeo players immediately
-     */
-    setupPendingPlayers();
-  } else {
-    // Load the Vimeo Player SDK script, then setup the Vimeo players
-    loadScript(VIMEO_PLAYER_SDK_URL).then(function() {
-      logger.info('Vimeo Player SDK was loaded successfully');
-      setupPendingPlayers();
-    }, function() {
-      logger.error('Vimeo Player SDK could not be loaded');
-    });
+    setupPlayer(playerElement);
   }
 };
 
@@ -918,7 +924,7 @@ var loadVimeoPlayerSdk = function() {
  *
  * @param {Object} settings The (configuration or action) settings object.
  */
-var registerVimeoPlayers = function(settings) {
+var registerPlayers = function(settings) {
   var elementSpecificitySetting = settings.elementSpecificity || 'any';
   var elementsSelectorSetting = settings.elementsSelector || '';
   var iframeSelector = elementSpecificitySetting === 'specific' && elementsSelectorSetting
@@ -940,7 +946,9 @@ var registerVimeoPlayers = function(settings) {
   elements.forEach(function(element, i) {
     // setup only those players that have NOT been setup by this extension
     switch (element.dataset.launchextSetup) {
+      case PLAYER_SETUP_STARTED_STATUS:
       case PLAYER_SETUP_COMPLETED_STATUS:
+      case PLAYER_SETUP_UPDATING_STATUS:
         break;
       case PLAYER_SETUP_MODIFIED_STATUS:
         registerPendingPlayer(element);
@@ -1010,7 +1018,7 @@ var observer = new MutationObserver(function(mutationsList) {
 
         /**
          * the next line calls the event listener that was added to the element (removedNode) in
-         * registerVimeoPlayers().
+         * registerPlayers().
          */
         removedNode.dispatchEvent(removeEvent);
 
@@ -1069,7 +1077,7 @@ module.exports = {
    * @param {Object} settings The (configuration or action) settings object.
    */
   enableVideoPlaybackTracking: function(settings) {
-    registerVimeoPlayers(settings);
+    registerPlayers(settings);
   },
 
   /**
