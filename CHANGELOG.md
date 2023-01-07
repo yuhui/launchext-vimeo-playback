@@ -1,3 +1,8 @@
+2.5.0 (released 5 January 2023)
+-------------------------------
+- Added a flag when enabling a video player with the Vimeo Player SDK.
+- Bundled Adobe Coral for faster loading of styles.
+
 2.4.1 (released 7 November 2022)
 --------------------------------
 
