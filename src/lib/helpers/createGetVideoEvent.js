@@ -17,25 +17,42 @@
 'use strict';
 
 /**
- * Create a synthetic playback event that can be sent to an Extension event's trigger
+ * Create a synthetic Vimeo playback event that can be sent to an Extension event's trigger
  * callback.
- * This synthetic event *MUST* be bound to the calling video DOM element.
+ * This synthetic event *MUST* be bound to the calling Vimeo IFrame DOM element.
  *
- * @param {Object} nativeEvent The native video event object.
- * @param {Object} stateData Data about the current state of the video player.
- * See `getVideoStateData()`.
+ * @param {Object or Event} nativeEvent The native video event object.
+ * @param {Object} stateData Data about the current state of the Vimeo player.
+ * See `getVideoStateData` helper module.
  * @param {String} videoPlatform Name of the video player's platform.
  *
- * @return {Event} Event object that is specific to the video playback's state.
+ * @return {Event} Event object that is specific to the video player's state.
  *
- * @this {DOMElement} The video DOM element that caused the event.
+ * @this {DOMElement} The video IFrame DOM element that caused the event.
  *
+ * @throws Will throw an error if nativeEvent is not a string.
  * @throws Will throw an error if stateData is not an object.
+ * @throws Will throw an error if videoPlatform is not a string.
  */
 module.exports = function(nativeEvent, stateData, videoPlatform) {
   var toString = Object.prototype.toString;
+  if (!nativeEvent) {
+    throw '"nativeEvent" argument not specified';
+  }
+  if (!/^\[object .*(Event|Object)\]$/.test(toString.call(nativeEvent))) {
+    throw '"nativeEvent" argument is not an object or browser event';
+  }
+  if (!stateData) {
+    throw '"stateData" argument not specified';
+  }
   if (toString.call(stateData) !== '[object Object]') {
-    throw new Error('"stateData" input is not an object');
+    throw '"stateData" argument is not an object';
+  }
+  if (!videoPlatform) {
+    throw '"videoPlatform" argument not specified';
+  }
+  if (toString.call(videoPlatform) !== '[object String]') {
+    throw '"videoPlatform" argument is not a string';
   }
 
   var event = {
@@ -44,5 +61,6 @@ module.exports = function(nativeEvent, stateData, videoPlatform) {
     nativeEvent: nativeEvent,
   };
   event[videoPlatform] = stateData;
+
   return event;
 };

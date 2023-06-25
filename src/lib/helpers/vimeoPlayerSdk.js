@@ -113,6 +113,7 @@ var PLAYER_SETUP_MODIFIED_STATUS = 'modified';
 var PLAYER_SETUP_UPDATING_STATUS = 'updating';
 var PLAYER_SETUP_COMPLETED_STATUS = 'completed';
 var PLAYER_SETUP_READY_STATUS = 'ready';
+var MAXIMUM_ATTEMPTS_TO_WAIT_FOR_VIDEO_PLATFORM_API = 5;
 var VIDEO_PLATFORM = 'vimeo';
 var VIMEO_PLAYER_SDK_URL = 'https://player.vimeo.com/api/player.js';
 
