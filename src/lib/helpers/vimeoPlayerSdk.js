@@ -412,7 +412,7 @@ var processPlaybackEvent = function(playbackEventType, player, nativeEvent) {
        * because it could be updated before findMilestone() has run or completed
        */
       currentTimeUpdateTime = parseFloat(JSON.parse(JSON.stringify(player.launchExt.playStopTime)));
-      findMilestone(player, nativeEvent, currentTimeUpdateTime);
+      findMilestone(player, currentTimeUpdateTime);
 
       break;
     case VIDEO_VOLUME_CHANGED:
@@ -506,10 +506,9 @@ var processPlaybackEvent = function(playbackEventType, player, nativeEvent) {
  * Check if a video milestone for the specified Vimeo player has been reached.
  *
  * @param {Object} player The Vimeo player object.
- * @param {Object} nativeEvent The native Vimeo event object.
  * @param {Number} currentTime The video's current time when checking for a milestone.
  */
-var findMilestone = function(player, nativeEvent, currentTime) {
+var findMilestone = function(player, currentTime) {
   if (
     !player.launchExt
     || !player.launchExt.triggers
@@ -525,6 +524,13 @@ var findMilestone = function(player, nativeEvent, currentTime) {
     return;
   }
 
+  /**
+   * Create a new "native" event for the milestone.
+   */
+  var milestoneEvent = {
+    target: player,
+  };
+
   var currentMilestonesLabels = Object.keys(currentMilestones);
   currentMilestonesLabels.forEach(function(label) {
     var triggers = currentMilestones[label];
@@ -532,13 +538,6 @@ var findMilestone = function(player, nativeEvent, currentTime) {
       label: label,
     };
 
-    /**
-     * the nativeEvent might contain a "data" key from a previous event
-     * but we don't want to show that "data" here
-     * so remove it before processing this VIDEO_MILESTONE event
-     */
-    var milestoneEvent = Object.assign({}, nativeEvent);
-    delete milestoneEvent.data;
     processEventType(VIDEO_MILESTONE, player, milestoneEvent, triggers, options);
   });
 };
