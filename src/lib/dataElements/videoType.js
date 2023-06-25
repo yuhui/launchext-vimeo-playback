@@ -16,16 +16,21 @@
 
 'use strict';
 
+var getVideoData = require('../helpers/getVideoData');
+
+var VIDEO_DATA_NAME = 'videoType';
+
 /**
  * Video Type data element.
  * This data element returns the Vimeo type of the currently loaded/playing video.
  *
  * @param {Object} settings The data element settings object.
  * @param {Object} event The event that triggered the evaluation of the data element.
- * @returns {float}
+ * @param {Object} event.vimeo State data of the Vimeo player.
+ *
+ * @returns {String} Type of the video.
  */
 module.exports = function(settings, event) {
-  if (event && event.vimeo) {
-    return event.vimeo.videoType;
-  }
+  var videoData = getVideoData(VIDEO_DATA_NAME, event);
+  return videoData;
 };

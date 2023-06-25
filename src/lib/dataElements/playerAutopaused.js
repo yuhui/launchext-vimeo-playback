@@ -16,16 +16,21 @@
 
 'use strict';
 
+var getVideoData = require('../helpers/getVideoData');
+
+var VIDEO_DATA_NAME = 'playerAutopaused';
+
 /**
  * Player Autopaused data element.
  * This data element returns the autopause state of the player.
  *
  * @param {Object} settings The data element settings object.
  * @param {Object} event The event that triggered the evaluation of the data element.
- * @returns {string}
+ * @param {Object} event.vimeo State data of the Vimeo player.
+ *
+ * @returns {Boolean} `true` if the player's state is autopaused, `false` otherwise.
  */
 module.exports = function(settings, event) {
-  if (event && event.vimeo) {
-    return event.vimeo.playerAutopaused;
-  }
+  var videoData = getVideoData(VIDEO_DATA_NAME, event);
+  return videoData;
 };

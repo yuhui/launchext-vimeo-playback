@@ -16,16 +16,21 @@
 
 'use strict';
 
+var getVideoData = require('../helpers/getVideoData');
+
+var VIDEO_DATA_NAME = 'videoLooped';
+
 /**
  * Video Looped data element.
  * This data element returns whether the video autoloops or not.
  *
  * @param {Object} settings The data element settings object.
  * @param {Object} event The event that triggered the evaluation of the data element.
- * @returns {boolean}
+ * @param {Object} event.vimeo State data of the Vimeo player.
+ *
+ * @returns {Boolean} `true` if the video autoloops, `false` otherwise.
  */
 module.exports = function(settings, event) {
-  if (event && event.vimeo) {
-    return event.vimeo.videoLooped;
-  }
+  var videoData = getVideoData(VIDEO_DATA_NAME, event);
+  return videoData;
 };

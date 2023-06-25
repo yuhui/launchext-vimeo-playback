@@ -16,16 +16,21 @@
 
 'use strict';
 
+var getVideoData = require('../helpers/getVideoData');
+
+var VIDEO_DATA_NAME = 'videoId';
+
 /**
  * Video ID data element.
  * This data element returns the Vimeo ID of the currently loaded/playing video.
  *
  * @param {Object} settings The data element settings object.
  * @param {Object} event The event that triggered the evaluation of the data element.
- * @returns {float}
+ * @param {Object} event.vimeo State data of the Vimeo player.
+ *
+ * @returns {String} ID of the video.
  */
 module.exports = function(settings, event) {
-  if (event && event.vimeo) {
-    return event.vimeo.videoId;
-  }
+  var videoData = getVideoData(VIDEO_DATA_NAME, event);
+  return videoData;
 };

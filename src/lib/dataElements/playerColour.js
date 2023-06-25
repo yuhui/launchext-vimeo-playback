@@ -16,16 +16,21 @@
 
 'use strict';
 
+var getVideoData = require('../helpers/getVideoData');
+
+var VIDEO_DATA_NAME = 'playerColour';
+
 /**
  * Player Colour data element.
  * This data element returns the colour of the player.
  *
  * @param {Object} settings The data element settings object.
  * @param {Object} event The event that triggered the evaluation of the data element.
- * @returns {float}
+ * @param {Object} event.vimeo State data of the Vimeo player.
+ *
+ * @returns {String} Colour of the player.
  */
 module.exports = function(settings, event) {
-  if (event && event.vimeo) {
-    return event.vimeo.playerColour;
-  }
+  var videoData = getVideoData(VIDEO_DATA_NAME, event);
+  return videoData;
 };

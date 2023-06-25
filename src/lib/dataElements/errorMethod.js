@@ -16,16 +16,21 @@
 
 'use strict';
 
+var getVideoData = require('../helpers/getVideoData');
+
+var VIDEO_DATA_NAME = 'errorMethod';
+
 /**
  * Error Method data element.
  * This data element returns the method that generated the error that occurred.
  *
  * @param {Object} settings The data element settings object.
  * @param {Object} event The event that triggered the evaluation of the data element.
- * @returns {string}
+ * @param {Object} event.vimeo State data of the Vimeo player.
+ *
+ * @returns {String} Method that generated the error that occurred.
  */
 module.exports = function(settings, event) {
-  if (event && event.vimeo && event.state === 'player error') {
-    return event.vimeo.errorMethod;
-  }
+  var videoData = getVideoData(VIDEO_DATA_NAME, event);
+  return videoData;
 };

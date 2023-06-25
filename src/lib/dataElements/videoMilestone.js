@@ -16,16 +16,21 @@
 
 'use strict';
 
+var getVideoData = require('../helpers/getVideoData');
+
+var VIDEO_DATA_NAME = 'videoMilestone';
+
 /**
  * Video Milestone data element.
  * This data element returns the milestone that has been played.
  *
  * @param {Object} settings The data element settings object.
  * @param {Object} event The event that triggered the evaluation of the data element.
- * @returns {integer}
+ * @param {Object} event.vimeo State data of the Vimeo player.
+ *
+ * @returns {Number} Milestone in seconds.
  */
 module.exports = function(settings, event) {
-  if (event && event.vimeo) {
-    return event.vimeo.videoMilestone;
-  }
+  var videoData = getVideoData(VIDEO_DATA_NAME, event);
+  return videoData;
 };

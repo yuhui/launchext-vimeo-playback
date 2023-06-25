@@ -16,16 +16,21 @@
 
 'use strict';
 
+var getVideoData = require('../helpers/getVideoData');
+
+var VIDEO_DATA_NAME = 'errorName';
+
 /**
  * Error Name data element.
  * This data element returns the name of the error that occurred.
  *
  * @param {Object} settings The data element settings object.
  * @param {Object} event The event that triggered the evaluation of the data element.
- * @returns {string}
+ * @param {Object} event.vimeo State data of the Vimeo player.
+ *
+ * @returns {String} Name of the error that occurred.
  */
 module.exports = function(settings, event) {
-  if (event && event.vimeo && event.state === 'player error') {
-    return event.vimeo.errorName;
-  }
+  var videoData = getVideoData(VIDEO_DATA_NAME, event);
+  return videoData;
 };

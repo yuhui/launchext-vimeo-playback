@@ -16,22 +16,21 @@
 
 'use strict';
 
+var getVideoData = require('../helpers/getVideoData');
+
+var VIDEO_DATA_NAME = 'videoPlayedSegmentTime';
+
 /**
  * Video Played Segment Time data element.
  * This data element returns the elapsed time in seconds since the video was last played.
  *
  * @param {Object} settings The data element settings object.
  * @param {Object} event The event that triggered the evaluation of the data element.
- * @returns {float}
+ * @param {Object} event.vimeo State data of the Vimeo player.
+ *
+ * @returns {Number} The elapsed time in seconds.
  */
 module.exports = function(settings, event) {
-  var allowedEvents = [
-    'player removed',
-    'video ended',
-    'video paused',
-    'video seeked,'
-  ];
-  if (event && event.vimeo && allowedEvents.indexOf(event.state) > -1) {
-    return event.vimeo.videoPlayedSegmentTime;
-  }
+  var videoData = getVideoData(VIDEO_DATA_NAME, event);
+  return videoData;
 };

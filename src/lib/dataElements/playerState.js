@@ -16,16 +16,21 @@
 
 'use strict';
 
+var getVideoData = require('../helpers/getVideoData');
+
+var VIDEO_DATA_NAME = 'playerState';
+
 /**
  * Player State data element.
  * This data element returns the state of the Vimeo Player.
  *
  * @param {Object} settings The data element settings object.
  * @param {Object} event The event that triggered the evaluation of the data element.
- * @returns {string}
+ * @param {Object} event.vimeo State data of the Vimeo player.
+ *
+ * @returns {String} The player state.
  */
 module.exports = function(settings, event) {
-  if (event && event.vimeo) {
-    return event.state;
-  }
+  var videoData = getVideoData(VIDEO_DATA_NAME, event);
+  return videoData;
 };

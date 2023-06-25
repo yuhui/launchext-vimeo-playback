@@ -16,16 +16,21 @@
 
 'use strict';
 
+var getVideoData = require('../helpers/getVideoData');
+
+var VIDEO_DATA_NAME = 'videoDuration';
+
 /**
  * Video Duration data element.
  * This data element returns the duration in seconds of the currently playing video.
  *
  * @param {Object} settings The data element settings object.
  * @param {Object} event The event that triggered the evaluation of the data element.
- * @returns {int}
+ * @param {Object} event.vimeo State data of the Vimeo player.
+ *
+ * @returns {Number} The video duration in seconds.
  */
 module.exports = function(settings, event) {
-  if (event && event.vimeo) {
-    return event.vimeo.videoDuration;
-  }
+  var videoData = getVideoData(VIDEO_DATA_NAME, event);
+  return videoData;
 };
