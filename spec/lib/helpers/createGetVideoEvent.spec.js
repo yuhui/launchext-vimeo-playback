@@ -1,5 +1,5 @@
 /**
- * Copyright 2022 Yuhui. All rights reserved.
+ * Copyright 2022-2023 Yuhui. All rights reserved.
  *
  * Licensed under the GNU General Public License, Version 3.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,44 +16,86 @@
 
 'use strict';
 
+const mockEvent = require('../../specHelpers/mockEvent');
+const mockTurbine = require('../../specHelpers/mockTurbine');
+
 describe('createGetVideoEvent helper delegate', () => {
-  const createGetVideoEventDelegate = require('../../../src/lib/helpers/createGetVideoEvent');
-  const element = jasmine.createSpy();
-  const eventType = 'test event type';
-  const nativeEvent = {};
-  const stateData = {};
-  const videoPlatform = 'vimeo';
-  const getVideoEvent = createGetVideoEventDelegate.bind(element);
+  beforeAll(() => {
+    this.helperDelegate = require('../../../src/lib/helpers/createGetVideoEvent');
+    this.nativeEvent = {};
+    this.stateData = {};
+    this.videoPlatform = 'bar';
+  });
 
-  it(
-    'throws an error when "eventType" input is not a string',
-    () => {
-      expect(() => {
-        getVideoEvent(null, nativeEvent, stateData, videoPlatform);
-      }).toThrowError('"eventType" input is not a string');
-    }
-  );
+  describe('with invalid arguments', () => {
+    it(
+      'should throw an error when "nativeEvent" argument is missing',
+      () => {
+        expect(() => {
+          this.helperDelegate(null, this.stateData, this.videoPlatform);
+        }).toThrow('"nativeEvent" argument not specified');
+      }
+    );
 
-  it(
-    'throws an error when "stateData" input is not an object',
-    () => {
-      expect(() => {
-        getVideoEvent(eventType, nativeEvent, null), videoPlatform;
-      }).toThrowError('"stateData" input is not an object');
-    }
-  );
+    it(
+      'should throw an error when "nativeEvent" argument is not an object or browser event',
+      () => {
+        expect(() => {
+          this.helperDelegate(123, this.stateData, this.videoPlatform);
+        }).toThrow('"nativeEvent" argument is not an object or browser event');
+      }
+    );
 
-  it(
-    'returns an object with the specified inputs set in the appropriate keys',
-    () => {
-      const result = getVideoEvent(eventType, nativeEvent, stateData, videoPlatform);
-      expect(result).toBeDefined();
-      expect(result.element).toEqual(element);
-      expect(result.target).toEqual(element);
-      expect(result.nativeEvent).toEqual(nativeEvent);
-      expect(result.state).toEqual(eventType);
-      expect(Object.keys(result)).toContain(videoPlatform);
-      expect(result[videoPlatform]).toEqual(stateData);
-    }
-  );
+    it(
+      'should throw an error when "stateData" argument is missing',
+      () => {
+        expect(() => {
+          this.helperDelegate(this.nativeEvent, null, this.videoPlatform);
+        }).toThrow('"stateData" argument not specified');
+      }
+    );
+
+    it(
+      'should throw an error when "stateData" argument is not an object',
+      () => {
+        expect(() => {
+          this.helperDelegate(this.nativeEvent, 'foo', this.videoPlatform);
+        }).toThrow('"stateData" argument is not an object');
+      }
+    );
+
+    it(
+      'should throw an error when "videoPlatform" argument is missing',
+      () => {
+        expect(() => {
+          this.helperDelegate(this.nativeEvent, this.stateData, null);
+        }).toThrow('"videoPlatform" argument not specified');
+      }
+    );
+
+    it(
+      'should throw an error when "videoPlatform" argument is not a string',
+      () => {
+        expect(() => {
+          this.helperDelegate(this.nativeEvent, this.stateData, 123);
+        }).toThrow('"videoPlatform" argument is not a string');
+      }
+    );
+  });
+
+  describe('with valid arguments', () => {
+    it(
+      'should return the expected value',
+      () => {
+        const result = this.helperDelegate(this.nativeEvent, this.stateData, this.videoPlatform);
+
+        expect(result).toBeInstanceOf(Object);
+        expect(result.element).toEqual(this);
+        expect(result.target).toEqual(this);
+        expect(result.nativeEvent).toEqual(this.nativeEvent);
+        expect(Object.keys(result)).toContain(this.videoPlatform);
+        expect(result[this.videoPlatform]).toEqual(this.stateData);
+      }
+    );
+  });
 });

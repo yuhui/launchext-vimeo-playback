@@ -48,7 +48,7 @@ module.exports = {
     }]
   }, {
     "id": "RL1608090868708",
-    "name": "Player Ready, Player Removed, Video Playing, Video Paused, Video Ended, Video Loaded, Video Seeked",
+    "name": "Player Ready, Player Removed, Video Playing, Video Paused, Video Ended, Video Loaded, Video Seeked, Video Time Updated",
     "events": [{
       "modulePath": "vimeo-playback/src/lib/events/playerReady.js",
       "settings": {}
@@ -119,9 +119,9 @@ module.exports = {
     "stage": "development"
   },
   "buildInfo": {
-    "turbineVersion": "27.2.1",
-    "turbineBuildDate": "2022-09-29T15:34:33.178Z",
-    "buildDate": "2022-09-29T15:34:33.178Z",
+    "turbineVersion": "27.5.0",
+    "turbineBuildDate": "2023-04-22T09:40:37.361Z",
+    "buildDate": "2023-04-22T09:40:37.361Z",
     "environment": "development"
   }
 }

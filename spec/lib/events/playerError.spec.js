@@ -1,5 +1,5 @@
 /**
- * Copyright 2022 Yuhui. All rights reserved.
+ * Copyright 2022-2023 Yuhui. All rights reserved.
  *
  * Licensed under the GNU General Public License, Version 3.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,17 +23,17 @@ describe(`"${eventState}" event delegate`, () => {
   it(
     'sends the trigger to the vimeoPlayerSdk helper module once only',
     () => {
-      const getVimeoPlayerSdkSpyObj = require('../../specHelpers/getVimeoPlayerSdkSpyObj');
-      const vimeoPlayerSdkSpyObj = getVimeoPlayerSdkSpyObj();
+      const mockVimeoPlayerSdk = require('../../specHelpers/mockVimeoPlayerSdk');
+      const vimeoPlayerSdk = mockVimeoPlayerSdk();
 
       const eventDelegate = proxyquire('../../../src/lib/events/playerError', {
-        '../helpers/vimeoPlayerSdk': vimeoPlayerSdkSpyObj,
+        '../helpers/vimeoPlayerSdk': vimeoPlayerSdk,
       });
       const settings = {};
       const trigger = jasmine.createSpy();
 
       eventDelegate(settings, trigger);
-      const result = vimeoPlayerSdkSpyObj.registerEventTrigger;
+      const result = vimeoPlayerSdk.registerEventTrigger;
       expect(result).toHaveBeenCalledTimes(1);
       expect(result).toHaveBeenCalledWith(eventState, settings, trigger);
     }

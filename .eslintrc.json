@@ -13,6 +13,7 @@
     "Vimeo": true,
     /** jasmine */
     "jasmine": true,
+    "afterAll": true,
     "beforeAll": true,
     "beforeEach": true,
     "describe": true,
