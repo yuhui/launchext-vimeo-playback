@@ -104,6 +104,7 @@ var IFRAME_SELECTOR = 'iframe[src*=vimeo]';
 var PLAYER_SETUP_MODIFIED_STATUS = 'modified';
 var PLAYER_SETUP_UPDATING_STATUS = 'updating';
 var PLAYER_SETUP_COMPLETED_STATUS = 'completed';
+var PLAYER_SETUP_READY_STATUS = 'ready';
 var VIDEO_PLATFORM = 'vimeo';
 var VIMEO_PLAYER_SDK_URL = 'https://player.vimeo.com/api/player.js';
 
@@ -264,7 +265,7 @@ var processPlaybackEvent = function(playbackEventType, player, nativeEvent) {
 
   // don't continue if this player hasn't been setup by this extension
   var element = player.element;
-  var elementIsSetup = element.dataset.launchextSetup === PLAYER_SETUP_COMPLETED_STATUS;
+  var elementIsSetup = element.dataset.launchextSetup === PLAYER_SETUP_READY_STATUS;
   if (!elementIsSetup) {
     return;
   }
@@ -562,7 +563,6 @@ var playerReady = function(event) {
     // this player wasn't setup by this extension
     return;
   }
-  element.dataset.launchextSetup = PLAYER_SETUP_COMPLETED_STATUS;
 
   // update static metadata
   Promise.allSettled([
@@ -614,6 +614,8 @@ var playerReady = function(event) {
 
     var isLiveEvent = player.launchExt.videoDuration === 0;
     player.launchExt.isLiveEvent = isLiveEvent;
+
+    element.dataset.launchextSetup = PLAYER_SETUP_READY_STATUS;
 
     processPlaybackEvent(PLAYER_READY, player, event);
   });
@@ -888,6 +890,8 @@ var setupPlayer = function(element) {
   observer.observe(element.parentNode, { childList: true });
 
   playerRegistry[elementId] = player;
+
+  element.dataset.launchextSetup = PLAYER_SETUP_COMPLETED_STATUS;
 };
 
 /**
