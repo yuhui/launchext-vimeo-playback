@@ -1,5 +1,5 @@
 /**
- * Copyright 2022 Yuhui. All rights reserved.
+ * Copyright 2022-2023 Yuhui. All rights reserved.
  *
  * Licensed under the GNU General Public License, Version 3.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -628,7 +628,7 @@ var playerReady = function(event) {
 
 /**
  * Callback function when the player has been removed from the DOM tree.
- * 
+ *
  * ALERT! There is no such event in the Vimeo Player SDK.
  * Instead, a "remove" event listener is added to each Vimeo IFrame DOM element.
  *
@@ -637,6 +637,9 @@ var playerReady = function(event) {
  * to be passed in for subsequent functions to utilise.
  *
  * @see registerPlayers()
+ *
+ * @param {Object} event The native browser event object.
+ * @param {Object} player The YouTube player object.
  */
 var playerRemoved = function(event, player) {
   processPlaybackEvent(PLAYER_REMOVED, player, event);
