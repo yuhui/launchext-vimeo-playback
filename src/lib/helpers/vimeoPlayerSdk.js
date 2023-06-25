@@ -657,15 +657,16 @@ var loadVimeoPlayerSdk = function() {
      * so setup the Vimeo players immediately
      */
     setupPendingPlayers();
-  } else {
-    // Load the Vimeo Player SDK script, then setup the Vimeo players
-    loadScript(VIMEO_PLAYER_SDK_URL).then(function() {
-      logger.info('Vimeo Player SDK was loaded successfully');
-      setupPendingPlayers();
-    }, function() {
-      logger.error('Vimeo Player SDK could not be loaded');
-    });
+    return;
   }
+
+  // Load the Vimeo Player SDK script, then setup the Vimeo players
+  loadScript(VIMEO_PLAYER_SDK_URL).then(function() {
+    logger.info('Vimeo Player SDK was loaded successfully');
+    setupPendingPlayers();
+  }, function() {
+    logger.error('Vimeo Player SDK could not be loaded');
+  });
 };
 
 /**
@@ -680,6 +681,15 @@ var pendingPlayersRegistry = [];
  * @param {DOMElement} playerElement A Vimeo IFrame DOM element.
  */
 var registerPendingPlayer = function(playerElement) {
+  if (vimeoPlayerSdkIsReady()) {
+    try {
+      setupPlayer(playerElement);
+    } catch (e) {
+      pendingPlayersRegistry.push(playerElement);
+    }
+    return;
+  }
+
   pendingPlayersRegistry.push(playerElement);
 };
 /**
@@ -905,12 +915,13 @@ var setupPendingPlayers = function(attempt) {
     // try again
     if (attempt > MAXIMUM_ATTEMPTS_TO_WAIT_FOR_VIDEO_PLATFORM_API) {
       logger.error('Unexpected error! Vimeo Player SDK has not been initialised');
-    } else {
-      var timeout = Math.pow(2, attempt - 1) * 1000;
-      setTimeout(function() {
-        setupPendingPlayers(attempt + 1);
-      }, timeout);
+      return;
     }
+
+    var timeout = Math.pow(2, attempt - 1) * 1000;
+    setTimeout(function() {
+      setupPendingPlayers(attempt + 1);
+    }, timeout);
     return;
   }
 
@@ -933,7 +944,6 @@ var registerPlayers = function(settings) {
   var iframeSelector = elementSpecificitySetting === 'specific' && elementsSelectorSetting
     ? elementsSelectorSetting
     : IFRAME_SELECTOR;
-  var loadVimeoPlayerSdkSetting = settings.loadVimeoPlayerSdk || 'yes';
 
   var elements = document.querySelectorAll(iframeSelector);
   var numElements = elements.length;
@@ -966,15 +976,18 @@ var registerPlayers = function(settings) {
   });
 
   if (pendingPlayersRegistryHasPlayers()) {
-    if (loadVimeoPlayerSdkSetting === 'yes') {
-      loadVimeoPlayerSdk();
-      // the players will be processed when the Vimeo object is ready
-    } else if (vimeoPlayerSdkIsLoaded()) {
-      setupPendingPlayers();
-    } else {
-      logger.debug(
-        'Need Vimeo Player SDK to become ready before setting up players'
-      );
+    var loadVimeoPlayerSdkSetting = settings.loadVimeoPlayerSdk || 'yes';
+    switch (loadVimeoPlayerSdkSetting) {
+      case 'yes':
+        loadVimeoPlayerSdk();
+        // the players will be processed when the Vimeo object is ready
+        break;
+      default:
+        logger.debug(
+          'Need Vimeo Player SDK to become ready before setting up players'
+        );
+        setupPendingPlayers();
+        break;
     }
   }
 };
