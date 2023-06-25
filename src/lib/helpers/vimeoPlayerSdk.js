@@ -295,6 +295,17 @@ var processPlaybackEvent = function(playbackEventType, player, nativeEvent) {
   var isTimeUpdateVeryDifferent;
   var currentTimeUpdateTime;
 
+  /**
+   * When the user skips in the video while it is playing, the normal event sequence is:
+   * "paused" -> "playing" ("resumed") -> "progress" -> "seeked" -> "progress"
+   *
+   * But sometimes, the sequence could be:
+   * "playing" ("resumed") -> "progress" -> "seeked" -> "progress"
+   * i.e. there is no "paused" at the start.
+   *
+   * A conscious decision has been made to ignore such exceptions.
+   */
+
   switch (playbackEventType) {
     case PLAYBACK_RATE_CHANGED:
       player.launchExt.videoPlaybackRate = dataPlaybackRate;
