@@ -383,6 +383,8 @@ var processPlaybackEvent = function(playbackEventType, player, nativeEvent) {
       player.launchExt.videoDuration = dataDuration;
       break;
     case VIDEO_TIME_UPDATED:
+      player.launchExt.previousUpdateTime = player.launchExt.videoUpdateTime;
+
       player.launchExt.playStopTime = dataSeconds;
       player.launchExt.videoCurrentTime = dataSeconds;
       player.launchExt.videoDuration = dataDuration;
@@ -399,8 +401,6 @@ var processPlaybackEvent = function(playbackEventType, player, nativeEvent) {
       if (videoTimeDifference(dataSeconds, player.launchExt.previousUpdateTime) < 0.3) {
         break;
       }
-
-      player.launchExt.previousUpdateTime = player.launchExt.videoUpdateTime;
 
       isTimeUpdateVeryDifferent =
         videoTimeDifference(dataSeconds, player.launchExt.previousUpdateTime) > 1;
