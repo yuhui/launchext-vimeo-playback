@@ -24,6 +24,7 @@ var Promise = require('@adobe/reactor-promise');
 var compileMilestones = require('./compileMilestones');
 var createGetVideoEvent = require('./createGetVideoEvent');
 var flooredVideoTime = require('./flooredVideoTime');
+var registerPlayerElement = require('./registerPlayerElement');
 var videoTimeDifference = require('./videoTimeDifference');
 
 var logger = turbine.logger;
@@ -99,16 +100,11 @@ var PLAYER_STOPPED_EVENT_TYPES = VIDEO_STOPPED_EVENT_TYPES.concat([
 ]);
 
 // constants related to setting up the Vimeo Player SDK
-var IFRAME_ID_PREFIX = 'vimeoPlayback';
 var IFRAME_SELECTOR = 'iframe[src*=vimeo]';
-var MAXIMUM_ATTEMPTS_TO_WAIT_FOR_VIDEO_PLATFORM_API = 5;
-var PLAYER_SETUP_STARTED_STATUS = 'started';
 var PLAYER_SETUP_MODIFIED_STATUS = 'modified';
 var PLAYER_SETUP_UPDATING_STATUS = 'updating';
 var PLAYER_SETUP_COMPLETED_STATUS = 'completed';
 var VIDEO_PLATFORM = 'vimeo';
-var VIDEO_TYPE_LIVE = 'live';
-var VIDEO_TYPE_VOD = 'video-on-demand';
 var VIMEO_PLAYER_SDK_URL = 'https://player.vimeo.com/api/player.js';
 
 // constants related to video milestone tracking
@@ -880,6 +876,17 @@ var setupPlayer = function(element) {
     });
   });
 
+  /**
+   * Also, trigger when this element has been unloaded from the DOM.
+   * 1. Listen for the "remove" event.
+   * 2. Observe changes to this element via its parentNode.
+   */
+  element.addEventListener('remove', function(event) {
+    var player = playerRegistry[this.id];
+    playerRemoved(event, player);
+  });
+  observer.observe(element.parentNode, { childList: true });
+
   playerRegistry[elementId] = player;
 };
 
@@ -943,47 +950,23 @@ var registerPlayers = function(settings) {
     return;
   }
 
+  // compile the list of required parameters to add to the IFrame's src URL
+  var parametersToAdd = {};
+
   elements.forEach(function(element, i) {
-    // setup only those players that have NOT been setup by this extension
-    switch (element.dataset.launchextSetup) {
-      case PLAYER_SETUP_STARTED_STATUS:
-      case PLAYER_SETUP_COMPLETED_STATUS:
-      case PLAYER_SETUP_UPDATING_STATUS:
-        break;
-      case PLAYER_SETUP_MODIFIED_STATUS:
-        registerPendingPlayer(element);
-        break;
-      default: {
-        // set a data attribute to indicate that this player is being setup
-        element.dataset.launchextSetup = PLAYER_SETUP_STARTED_STATUS;
-
-        // ensure that the IFrame has an `id` attribute
-        var elementId = element.id;
-        if (!elementId) {
-          // set the `id` attribute to the current timestamp and index
-          elementId = IFRAME_ID_PREFIX + '_' + new Date().valueOf() + '_' + i;
-          element.id = elementId;
-        }
-
-        /**
-         * add a custom "remove" event listener
-         * this will cause the Extension-specific PLAYER_REMOVED event type to be sent
-         */
-        element.addEventListener('remove', function(event) {
-          var removedElement = event.target;
-          var player = playerRegistry[removedElement.id];
-          playerRemoved(event, player);
-        });
-
-        // observe changes to this element via its parentNode
-        observer.observe(element.parentNode, {childList: true});
-
-        element.dataset.launchextSetup = PLAYER_SETUP_MODIFIED_STATUS;
-        registerPendingPlayer(element);
-
-        break;
-      }
+    var playerElement;
+    try  {
+      playerElement = registerPlayerElement(element, i, parametersToAdd);
+    } catch (e) {
+      logger.error(e, element);
+      return;
     }
+
+    if (!playerElement) {
+      return;
+    }
+
+    registerPendingPlayer(playerElement);
   });
 
   if (pendingPlayersRegistryHasPlayers()) {
