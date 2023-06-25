@@ -23,6 +23,7 @@ var Promise = require('@adobe/reactor-promise');
 
 var compileMilestones = require('./compileMilestones');
 var createGetVideoEvent = require('./createGetVideoEvent');
+var getVideoStateData = require('./getVideoStateData');
 var flooredVideoTime = require('./flooredVideoTime');
 var registerPlayerElement = require('./registerPlayerElement');
 var videoTimeDifference = require('./videoTimeDifference');
@@ -141,39 +142,6 @@ var eventRegistry = {};
 var playerRegistry = {};
 
 /**
- * Get data about the current Vimeo player's state.
- *
- * @param {Object} player The Vimeo player object.
- *
- * @return {Object} Data about the current state of the Vimeo player.
- */
-var getVideoStateData = function(player) {
-  var videoType = player.launchExt.isLiveEvent ? VIDEO_TYPE_LIVE : VIDEO_TYPE_VOD;
-
-  var stateData = {
-    player: player,
-    playerAutopaused: player.launchExt.isAutopaused,
-    playerColour: player.launchExt.playerColour,
-    videoCurrentTime: player.launchExt.videoCurrentTime,
-    videoDuration: player.launchExt.videoDuration,
-    videoHeight: player.launchExt.videoHeight,
-    videoId: player.launchExt.videoId,
-    videoLoadedFraction: player.launchExt.videoLoadedFraction,
-    videoLooped: player.launchExt.isVideoLooped,
-    videoMuted: player.launchExt.videoVolume === 0,
-    videoPlaybackRate: player.launchExt.videoPlaybackRate,
-    videoTitle: player.launchExt.videoTitle,
-    videoType: videoType,
-    videoUrl: player.launchExt.videoUrl,
-    videoVolume: player.launchExt.videoVolume,
-    videoWidth: player.launchExt.videoWidth,
-  };
-
-  return stateData;
-};
-
-
-/**
  * Handle an Event Type.
  *
  * @param {String} eventType The Event Type that has been triggered.
@@ -189,7 +157,13 @@ var processEventType = function(eventType, player, nativeEvent, eventTriggers, o
     return;
   }
 
-  var stateData = getVideoStateData(player);
+  var stateData;
+  try {
+    stateData = getVideoStateData(player, eventType);
+  } catch (e) {
+    logger.error(e);
+    return;
+  }
 
   // perform additional tasks based on the Event Type
   var element = player.element;
