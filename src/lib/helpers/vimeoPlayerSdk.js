@@ -1,5 +1,5 @@
 /**
- * Copyright 2022 Yuhui. All rights reserved.
+ * Copyright 2022-2023 Yuhui. All rights reserved.
  *
  * Licensed under the GNU General Public License, Version 3.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,9 @@ var Promise = require('@adobe/reactor-promise');
 
 var compileMilestones = require('./compileMilestones');
 var createGetVideoEvent = require('./createGetVideoEvent');
+var getVideoStateData = require('./getVideoStateData');
 var flooredVideoTime = require('./flooredVideoTime');
+var registerPlayerElement = require('./registerPlayerElement');
 var videoTimeDifference = require('./videoTimeDifference');
 
 var logger = turbine.logger;
@@ -87,6 +89,13 @@ var VIDEO_EVENT_TYPES = [
   // but *not* VIDEO_TIME_UPDATED because it needs to be detected every time it is triggered
 ];
 
+// set of Event Types when video had started playing
+var VIDEO_PLAYING_EVENT_TYPES = [
+  VIDEO_REPLAYED,
+  VIDEO_RESUMED,
+  VIDEO_STARTED,
+];
+
 // set of Event Types when video had stopped playing
 var VIDEO_STOPPED_EVENT_TYPES = [
   VIDEO_PAUSED,
@@ -99,16 +108,13 @@ var PLAYER_STOPPED_EVENT_TYPES = VIDEO_STOPPED_EVENT_TYPES.concat([
 ]);
 
 // constants related to setting up the Vimeo Player SDK
-var IFRAME_ID_PREFIX = 'vimeoPlayback';
 var IFRAME_SELECTOR = 'iframe[src*=vimeo]';
-var MAXIMUM_ATTEMPTS_TO_WAIT_FOR_VIDEO_PLATFORM_API = 5;
-var PLAYER_SETUP_STARTED_STATUS = 'started';
 var PLAYER_SETUP_MODIFIED_STATUS = 'modified';
 var PLAYER_SETUP_UPDATING_STATUS = 'updating';
 var PLAYER_SETUP_COMPLETED_STATUS = 'completed';
+var PLAYER_SETUP_READY_STATUS = 'ready';
+var MAXIMUM_ATTEMPTS_TO_WAIT_FOR_VIDEO_PLATFORM_API = 5;
 var VIDEO_PLATFORM = 'vimeo';
-var VIDEO_TYPE_LIVE = 'live';
-var VIDEO_TYPE_VOD = 'video-on-demand';
 var VIMEO_PLAYER_SDK_URL = 'https://player.vimeo.com/api/player.js';
 
 // constants related to video milestone tracking
@@ -144,39 +150,6 @@ var eventRegistry = {};
 var playerRegistry = {};
 
 /**
- * Get data about the current Vimeo player's state.
- *
- * @param {Object} player The Vimeo player object.
- *
- * @return {Object} Data about the current state of the Vimeo player.
- */
-var getVideoStateData = function(player) {
-  var videoType = player.launchExt.isLiveEvent ? VIDEO_TYPE_LIVE : VIDEO_TYPE_VOD;
-
-  var stateData = {
-    player: player,
-    playerAutopaused: player.launchExt.isAutopaused,
-    playerColour: player.launchExt.playerColour,
-    videoCurrentTime: player.launchExt.videoCurrentTime,
-    videoDuration: player.launchExt.videoDuration,
-    videoHeight: player.launchExt.videoHeight,
-    videoId: player.launchExt.videoId,
-    videoLoadedFraction: player.launchExt.videoLoadedFraction,
-    videoLooped: player.launchExt.isVideoLooped,
-    videoMuted: player.launchExt.videoVolume === 0,
-    videoPlaybackRate: player.launchExt.videoPlaybackRate,
-    videoTitle: player.launchExt.videoTitle,
-    videoType: videoType,
-    videoUrl: player.launchExt.videoUrl,
-    videoVolume: player.launchExt.videoVolume,
-    videoWidth: player.launchExt.videoWidth,
-  };
-
-  return stateData;
-};
-
-
-/**
  * Handle an Event Type.
  *
  * @param {String} eventType The Event Type that has been triggered.
@@ -192,7 +165,13 @@ var processEventType = function(eventType, player, nativeEvent, eventTriggers, o
     return;
   }
 
-  var stateData = getVideoStateData(player);
+  var stateData;
+  try {
+    stateData = getVideoStateData(player, eventType);
+  } catch (e) {
+    logger.error(e);
+    return;
+  }
 
   // perform additional tasks based on the Event Type
   var element = player.element;
@@ -220,26 +199,27 @@ var processEventType = function(eventType, player, nativeEvent, eventTriggers, o
   stateData.videoCurrentTime = Math.floor(stateData.videoCurrentTime);
   stateData.videoDuration = Math.floor(stateData.videoDuration);
 
-  // set playTotalTime with events where the video has stopped playing
+  // set playSegmentTime and playTotalTime with events where the video has stopped playing
   if (PLAYER_STOPPED_EVENT_TYPES.indexOf(eventType) > -1) {
-    player.launchExt.playTime = player.launchExt.playStopTime - player.launchExt.playStartTime;
+    player.launchExt.playSegmentTime =
+      player.launchExt.playStopTime - player.launchExt.playStartTime;
 
     /**
      * if the video was already paused before the player got removed,
-     * then there is no playTime,
+     * then there is no playSegmentTime,
      * otherwise playTotalTime would be double-adding the played time wrongly
      */
     var videoHasEnded = player.launchExt.hasEnded;
     var videoHasPaused = player.launchExt.hasPaused;
     if (eventType === PLAYER_REMOVED && (videoHasPaused || videoHasEnded)) {
-      player.launchExt.playTime = 0;
+      player.launchExt.playSegmentTime = 0;
     }
 
-    player.launchExt.playTotalTime += player.launchExt.playTime;
+    player.launchExt.playTotalTime += player.launchExt.playSegmentTime;
     player.launchExt.playPreviousTotalTime = player.launchExt.playTotalTime;
 
     stateData.videoPlayedTotalTime = Math.floor(player.launchExt.playTotalTime);
-    stateData.videoPlayedSegmentTime = Math.round(player.launchExt.playTime);
+    stateData.videoPlayedSegmentTime = Math.round(player.launchExt.playSegmentTime);
   }
 
   logger.info(logInfoMessage);
@@ -248,7 +228,7 @@ var processEventType = function(eventType, player, nativeEvent, eventTriggers, o
   var getVideoEvent = createGetVideoEvent.bind(element);
   eventTriggers.forEach(function(trigger) {
     trigger(
-      getVideoEvent(eventType, nativeEvent, stateData, VIDEO_PLATFORM)
+      getVideoEvent(nativeEvent, stateData, VIDEO_PLATFORM)
     );
   });
 };
@@ -268,7 +248,7 @@ var processPlaybackEvent = function(playbackEventType, player, nativeEvent) {
 
   // don't continue if this player hasn't been setup by this extension
   var element = player.element;
-  var elementIsSetup = element.dataset.launchextSetup === PLAYER_SETUP_COMPLETED_STATUS;
+  var elementIsSetup = element.dataset.launchextSetup === PLAYER_SETUP_READY_STATUS;
   if (!elementIsSetup) {
     return;
   }
@@ -314,6 +294,17 @@ var processPlaybackEvent = function(playbackEventType, player, nativeEvent) {
   // these 2 variables are used in VIDEO_TIME_UPDATED
   var isTimeUpdateVeryDifferent;
   var currentTimeUpdateTime;
+
+  /**
+   * When the user skips in the video while it is playing, the normal event sequence is:
+   * "paused" -> "playing" ("resumed") -> "progress" -> "seeked" -> "progress"
+   *
+   * But sometimes, the sequence could be:
+   * "playing" ("resumed") -> "progress" -> "seeked" -> "progress"
+   * i.e. there is no "paused" at the start.
+   *
+   * A conscious decision has been made to ignore such exceptions.
+   */
 
   switch (playbackEventType) {
     case PLAYBACK_RATE_CHANGED:
@@ -403,6 +394,8 @@ var processPlaybackEvent = function(playbackEventType, player, nativeEvent) {
       player.launchExt.videoDuration = dataDuration;
       break;
     case VIDEO_TIME_UPDATED:
+      player.launchExt.previousUpdateTime = player.launchExt.videoUpdateTime;
+
       player.launchExt.playStopTime = dataSeconds;
       player.launchExt.videoCurrentTime = dataSeconds;
       player.launchExt.videoDuration = dataDuration;
@@ -420,8 +413,6 @@ var processPlaybackEvent = function(playbackEventType, player, nativeEvent) {
         break;
       }
 
-      player.launchExt.previousUpdateTime = player.launchExt.videoUpdateTime;
-
       isTimeUpdateVeryDifferent =
         videoTimeDifference(dataSeconds, player.launchExt.previousUpdateTime) > 1;
       if (isTimeUpdateVeryDifferent) {
@@ -433,7 +424,7 @@ var processPlaybackEvent = function(playbackEventType, player, nativeEvent) {
        * because it could be updated before findMilestone() has run or completed
        */
       currentTimeUpdateTime = parseFloat(JSON.parse(JSON.stringify(player.launchExt.playStopTime)));
-      findMilestone(player, nativeEvent, currentTimeUpdateTime);
+      findMilestone(player, currentTimeUpdateTime);
 
       break;
     case VIDEO_VOLUME_CHANGED:
@@ -454,6 +445,18 @@ var processPlaybackEvent = function(playbackEventType, player, nativeEvent) {
 
   var eventTriggers = triggers[eventType];
   processEventType(eventType, player, nativeEvent, eventTriggers, options);
+  if (VIDEO_PLAYING_EVENT_TYPES.indexOf(eventType) > -1) {
+    /**
+     * A VIDEO_PLAYING event still needs to get triggered because that event could have been setup
+     * in another Rule.
+     * But we'll save a few CPU cycles by checking if there are any triggers for VIDEO_PLAYING
+     * *before* actually processingg VIDEO_PLAYING.
+     */
+    var videoPlayingEventTriggers = triggers[VIDEO_PLAYING];
+    if (videoPlayingEventTriggers.length > 0) {
+      processEventType(VIDEO_PLAYING, player, nativeEvent, videoPlayingEventTriggers, options);
+    }
+  }
 
   /**
    * for video playing Event Types:
@@ -515,10 +518,9 @@ var processPlaybackEvent = function(playbackEventType, player, nativeEvent) {
  * Check if a video milestone for the specified Vimeo player has been reached.
  *
  * @param {Object} player The Vimeo player object.
- * @param {Object} nativeEvent The native Vimeo event object.
  * @param {Number} currentTime The video's current time when checking for a milestone.
  */
-var findMilestone = function(player, nativeEvent, currentTime) {
+var findMilestone = function(player, currentTime) {
   if (
     !player.launchExt
     || !player.launchExt.triggers
@@ -534,6 +536,13 @@ var findMilestone = function(player, nativeEvent, currentTime) {
     return;
   }
 
+  /**
+   * Create a new "native" event for the milestone.
+   */
+  var milestoneEvent = {
+    target: player,
+  };
+
   var currentMilestonesLabels = Object.keys(currentMilestones);
   currentMilestonesLabels.forEach(function(label) {
     var triggers = currentMilestones[label];
@@ -541,13 +550,6 @@ var findMilestone = function(player, nativeEvent, currentTime) {
       label: label,
     };
 
-    /**
-     * the nativeEvent might contain a "data" key from a previous event
-     * but we don't want to show that "data" here
-     * so remove it before processing this VIDEO_MILESTONE event
-     */
-    var milestoneEvent = Object.assign({}, nativeEvent);
-    delete milestoneEvent.data;
     processEventType(VIDEO_MILESTONE, player, milestoneEvent, triggers, options);
   });
 };
@@ -566,7 +568,6 @@ var playerReady = function(event) {
     // this player wasn't setup by this extension
     return;
   }
-  element.dataset.launchextSetup = PLAYER_SETUP_COMPLETED_STATUS;
 
   // update static metadata
   Promise.allSettled([
@@ -619,13 +620,15 @@ var playerReady = function(event) {
     var isLiveEvent = player.launchExt.videoDuration === 0;
     player.launchExt.isLiveEvent = isLiveEvent;
 
+    element.dataset.launchextSetup = PLAYER_SETUP_READY_STATUS;
+
     processPlaybackEvent(PLAYER_READY, player, event);
   });
 };
 
 /**
  * Callback function when the player has been removed from the DOM tree.
- * 
+ *
  * ALERT! There is no such event in the Vimeo Player SDK.
  * Instead, a "remove" event listener is added to each Vimeo IFrame DOM element.
  *
@@ -634,6 +637,9 @@ var playerReady = function(event) {
  * to be passed in for subsequent functions to utilise.
  *
  * @see registerPlayers()
+ *
+ * @param {Object} event The native browser event object.
+ * @param {Object} player The YouTube player object.
  */
 var playerRemoved = function(event, player) {
   processPlaybackEvent(PLAYER_REMOVED, player, event);
@@ -666,15 +672,16 @@ var loadVimeoPlayerSdk = function() {
      * so setup the Vimeo players immediately
      */
     setupPendingPlayers();
-  } else {
-    // Load the Vimeo Player SDK script, then setup the Vimeo players
-    loadScript(VIMEO_PLAYER_SDK_URL).then(function() {
-      logger.info('Vimeo Player SDK was loaded successfully');
-      setupPendingPlayers();
-    }, function() {
-      logger.error('Vimeo Player SDK could not be loaded');
-    });
+    return;
   }
+
+  // Load the Vimeo Player SDK script, then setup the Vimeo players
+  loadScript(VIMEO_PLAYER_SDK_URL).then(function() {
+    logger.info('Vimeo Player SDK was loaded successfully');
+    setupPendingPlayers();
+  }, function() {
+    logger.error('Vimeo Player SDK could not be loaded');
+  });
 };
 
 /**
@@ -689,6 +696,15 @@ var pendingPlayersRegistry = [];
  * @param {DOMElement} playerElement A Vimeo IFrame DOM element.
  */
 var registerPendingPlayer = function(playerElement) {
+  if (vimeoPlayerSdkIsReady()) {
+    try {
+      setupPlayer(playerElement);
+    } catch (e) {
+      pendingPlayersRegistry.push(playerElement);
+    }
+    return;
+  }
+
   pendingPlayersRegistry.push(playerElement);
 };
 /**
@@ -772,7 +788,6 @@ var setupPlayer = function(element) {
     playSegmentTime: 0,
     playStartTime: 0,
     playStopTime: 0,
-    playTime: 0,
     playTotalTime: 0,
     previousEventType: null,
     previousUpdateTime: 0,
@@ -880,7 +895,20 @@ var setupPlayer = function(element) {
     });
   });
 
+  /**
+   * Also, trigger when this element has been unloaded from the DOM.
+   * 1. Listen for the "remove" event.
+   * 2. Observe changes to this element via its parentNode.
+   */
+  element.addEventListener('remove', function(event) {
+    var player = playerRegistry[this.id];
+    playerRemoved(event, player);
+  });
+  observer.observe(element.parentNode, { childList: true });
+
   playerRegistry[elementId] = player;
+
+  element.dataset.launchextSetup = PLAYER_SETUP_COMPLETED_STATUS;
 };
 
 /**
@@ -902,12 +930,13 @@ var setupPendingPlayers = function(attempt) {
     // try again
     if (attempt > MAXIMUM_ATTEMPTS_TO_WAIT_FOR_VIDEO_PLATFORM_API) {
       logger.error('Unexpected error! Vimeo Player SDK has not been initialised');
-    } else {
-      var timeout = Math.pow(2, attempt - 1) * 1000;
-      setTimeout(function() {
-        setupPendingPlayers(attempt + 1);
-      }, timeout);
+      return;
     }
+
+    var timeout = Math.pow(2, attempt - 1) * 1000;
+    setTimeout(function() {
+      setupPendingPlayers(attempt + 1);
+    }, timeout);
     return;
   }
 
@@ -930,7 +959,6 @@ var registerPlayers = function(settings) {
   var iframeSelector = elementSpecificitySetting === 'specific' && elementsSelectorSetting
     ? elementsSelectorSetting
     : IFRAME_SELECTOR;
-  var loadVimeoPlayerSdkSetting = settings.loadVimeoPlayerSdk || 'yes';
 
   var elements = document.querySelectorAll(iframeSelector);
   var numElements = elements.length;
@@ -943,59 +971,38 @@ var registerPlayers = function(settings) {
     return;
   }
 
+  // compile the list of required parameters to add to the IFrame's src URL
+  var parametersToAdd = {};
+
   elements.forEach(function(element, i) {
-    // setup only those players that have NOT been setup by this extension
-    switch (element.dataset.launchextSetup) {
-      case PLAYER_SETUP_STARTED_STATUS:
-      case PLAYER_SETUP_COMPLETED_STATUS:
-      case PLAYER_SETUP_UPDATING_STATUS:
-        break;
-      case PLAYER_SETUP_MODIFIED_STATUS:
-        registerPendingPlayer(element);
-        break;
-      default: {
-        // set a data attribute to indicate that this player is being setup
-        element.dataset.launchextSetup = PLAYER_SETUP_STARTED_STATUS;
-
-        // ensure that the IFrame has an `id` attribute
-        var elementId = element.id;
-        if (!elementId) {
-          // set the `id` attribute to the current timestamp and index
-          elementId = IFRAME_ID_PREFIX + '_' + new Date().valueOf() + '_' + i;
-          element.id = elementId;
-        }
-
-        /**
-         * add a custom "remove" event listener
-         * this will cause the Extension-specific PLAYER_REMOVED event type to be sent
-         */
-        element.addEventListener('remove', function(event) {
-          var removedElement = event.target;
-          var player = playerRegistry[removedElement.id];
-          playerRemoved(event, player);
-        });
-
-        // observe changes to this element via its parentNode
-        observer.observe(element.parentNode, {childList: true});
-
-        element.dataset.launchextSetup = PLAYER_SETUP_MODIFIED_STATUS;
-        registerPendingPlayer(element);
-
-        break;
-      }
+    var playerElement;
+    try  {
+      playerElement = registerPlayerElement(element, i, parametersToAdd);
+    } catch (e) {
+      logger.error(e, element);
+      return;
     }
+
+    if (!playerElement) {
+      return;
+    }
+
+    registerPendingPlayer(playerElement);
   });
 
   if (pendingPlayersRegistryHasPlayers()) {
-    if (loadVimeoPlayerSdkSetting === 'yes') {
-      loadVimeoPlayerSdk();
-      // the players will be processed when the Vimeo object is ready
-    } else if (vimeoPlayerSdkIsLoaded()) {
-      setupPendingPlayers();
-    } else {
-      logger.debug(
-        'Need Vimeo Player SDK to become ready before setting up players'
-      );
+    var loadVimeoPlayerSdkSetting = settings.loadVimeoPlayerSdk || 'yes';
+    switch (loadVimeoPlayerSdkSetting) {
+      case 'yes':
+        loadVimeoPlayerSdk();
+        // the players will be processed when the Vimeo object is ready
+        break;
+      default:
+        logger.debug(
+          'Need Vimeo Player SDK to become ready before setting up players'
+        );
+        setupPendingPlayers();
+        break;
     }
   }
 };
@@ -1012,7 +1019,7 @@ var observer = new MutationObserver(function(mutationsList) {
      */
     mutation.removedNodes.forEach(function(removedNode) {
       var removedIframeNode = removedNode.nodeName.toLowerCase() === 'iframe';
-      var removedPlayer = removedNode.id in playerRegistry;
+      var removedPlayer = removedNode.id && removedNode.id in playerRegistry;
       if (removedIframeNode && removedPlayer) {
         var removeEvent = new Event('remove');
 
@@ -1104,17 +1111,21 @@ module.exports = {
     // so use an array to store the eventType(s)
     var eventTypes = [];
     if (eventType === VIDEO_PLAYING) {
+      var trackStarted = settings.trackStarted === 'yes';
+      var trackReplayed = settings.trackReplayed === 'yes';
+      var trackResumed = settings.trackResumed === 'yes';
+      var doTrackPlaying = settings.doNotTrack !== 'yes';
       // change eventType to match the user-selected play event type
-      if (settings.trackStarted === 'yes') {
+      if (trackStarted) {
         eventTypes.push(VIDEO_STARTED);
       }
-      if (settings.trackReplayed === 'yes') {
+      if (trackReplayed) {
         eventTypes.push(VIDEO_REPLAYED);
       }
-      if (settings.trackResumed === 'yes') {
+      if (trackResumed) {
         eventTypes.push(VIDEO_RESUMED);
       }
-      if (settings.doNotTrack !== 'yes') {
+      if ((!trackStarted && !trackReplayed && !trackResumed) || doTrackPlaying) {
         eventTypes.push(VIDEO_PLAYING);
       }
     } else {

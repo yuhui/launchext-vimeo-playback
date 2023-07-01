@@ -1,5 +1,5 @@
 /**
- * Copyright 2022 Yuhui. All rights reserved.
+ * Copyright 2022-2023 Yuhui. All rights reserved.
  *
  * Licensed under the GNU General Public License, Version 3.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,21 +16,21 @@
 
 'use strict';
 
+var getVideoData = require('../helpers/getVideoData');
+
+var VIDEO_DATA_NAME = 'videoPlayedTotalTime';
+
 /**
  * Video Played Total Time data element.
  * This data element returns the total elapsed time in seconds when the video was being played.
  *
  * @param {Object} settings The data element settings object.
  * @param {Object} event The event that triggered the evaluation of the data element.
- * @returns {float}
+ * @param {Object} event.vimeo State data of the Vimeo player.
+ *
+ * @returns {Number} The total elapsed time in seconds.
  */
 module.exports = function(settings, event) {
-  var allowedEvents = [
-    'player removed',
-    'video ended',
-    'video paused',
-  ];
-  if (event && event.vimeo && allowedEvents.indexOf(event.state) > -1) {
-    return event.vimeo.videoPlayedTotalTime;
-  }
+  var videoData = getVideoData(VIDEO_DATA_NAME, event);
+  return videoData;
 };

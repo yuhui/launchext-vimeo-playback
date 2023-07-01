@@ -1,5 +1,5 @@
 /**
- * Copyright 2022 Yuhui. All rights reserved.
+ * Copyright 2022-2023 Yuhui. All rights reserved.
  *
  * Licensed under the GNU General Public License, Version 3.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,17 +18,17 @@
 
 const proxyquire = require('proxyquire').noCallThru();
 
+const mockTurbine = require('../../specHelpers/mockTurbine');
+const mockVimeoPlayerSdk = require('../../specHelpers/mockVimeoPlayerSdk');
+
 describe('loadVimeoPlayerSdkScript action delegate', () => {
-  // mock turbine.logger
-  global.turbine = global.turbine || {
-    logger: jasmine.createSpyObj('', ['debug', 'info', 'warn', 'alert', 'error']),
-  };
+  const vimeoPlayerSdk = mockVimeoPlayerSdk();
 
-  const getVimeoPlayerSdkSpyObj = require('../../specHelpers/getVimeoPlayerSdkSpyObj');
-  const vimeoPlayerSdkSpyObj = getVimeoPlayerSdkSpyObj();
-
-  const actionDelegate = proxyquire('../../../src/lib/actions/loadVimeoPlayerSdkScript', {
-    '../helpers/vimeoPlayerSdk': vimeoPlayerSdkSpyObj,
+  beforeAll(() => {
+    global.turbine = mockTurbine;
+    this.actionDelegate = proxyquire('../../../src/lib/actions/loadVimeoPlayerSdkScript', {
+      '../helpers/vimeoPlayerSdk': vimeoPlayerSdk,
+    });
   });
 
   beforeEach(() => {
@@ -37,13 +37,17 @@ describe('loadVimeoPlayerSdkScript action delegate', () => {
     this.event = {
       '$type': 'dom-ready',
     };
-    actionDelegate(this.settings, this.event);
+    this.actionDelegate(this.settings, this.event);
+  });
+
+  afterAll(() => {
+    delete global.turbine;
   });
 
   it(
     'calls the action from the vimeoPlayerSdk helper module once only',
     () => {
-      const result = vimeoPlayerSdkSpyObj.loadVimeoPlayerSdkScript;
+      const result = vimeoPlayerSdk.loadVimeoPlayerSdkScript;
       expect(result).toHaveBeenCalledOnceWith(this.settings);
     }
   );

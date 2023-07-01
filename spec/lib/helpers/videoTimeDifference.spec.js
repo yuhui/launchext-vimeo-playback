@@ -1,5 +1,5 @@
 /**
- * Copyright 2022 Yuhui. All rights reserved.
+ * Copyright 2022-2023 Yuhui. All rights reserved.
  *
  * Licensed under the GNU General Public License, Version 3.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,18 @@
 
 'use strict';
 
+const SEVENTEEN = 17;
+const SIX = 6;
+
 describe('videoTimeDifference helper delegate', () => {
-  const helperDelegate = require('../../../src/lib/helpers/videoTimeDifference');
-  const seventeen = 17;
-  const six = 6;
+  beforeAll(() => {
+    this.helperDelegate = require('../../../src/lib/helpers/videoTimeDifference');
+  });
 
   it(
     'equals 11 when the inputs are 17 and 6',
     () => {
-      const result = helperDelegate(seventeen, six);
+      const result = this.helperDelegate(SEVENTEEN, SIX);
       expect(result).toEqual(11);
     }
   );
@@ -32,7 +35,7 @@ describe('videoTimeDifference helper delegate', () => {
   it(
     'equals 11 when the inputs are 6 and 17',
     () => {
-      const result = helperDelegate(six, seventeen);
+      const result = this.helperDelegate(SIX, SEVENTEEN);
       expect(result).toEqual(11);
     }
   );

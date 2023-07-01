@@ -1,5 +1,5 @@
 /**
- * Copyright 2022 Yuhui. All rights reserved.
+ * Copyright 2022-2023 Yuhui. All rights reserved.
  *
  * Licensed under the GNU General Public License, Version 3.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,19 @@
 
 'use strict';
 
+const mockEvent = require('../../specHelpers/mockEvent');
+const mockTurbine = require('../../specHelpers/mockTurbine');
+
 describe('flooredVideoTime helper delegate', () => {
-  const helperDelegate = require('../../../src/lib/helpers/flooredVideoTime');
+  beforeAll(() => {
+    this.helperDelegate = require('../../../src/lib/helpers/flooredVideoTime');
+  });
 
   it(
     'floors to 10.0 when the input is 10.0',
     () => {
-      const result = helperDelegate(10.0);
+      const result = this.helperDelegate(10.0);
+
       expect(result).toEqual(10.0);
     }
   );
@@ -30,7 +36,8 @@ describe('flooredVideoTime helper delegate', () => {
   it(
     'floors to 10.0 when the input is 10.4',
     () => {
-      const result = helperDelegate(10.4);
+      const result = this.helperDelegate(10.4);
+
       expect(result).toEqual(10.0);
     }
   );
@@ -38,7 +45,8 @@ describe('flooredVideoTime helper delegate', () => {
   it(
     'floors to 10.5 when the input is 10.5',
     () => {
-      const result = helperDelegate(10.5);
+      const result = this.helperDelegate(10.5);
+
       expect(result).toEqual(10.5);
     }
   );
@@ -46,7 +54,8 @@ describe('flooredVideoTime helper delegate', () => {
   it(
     'floors to 10.5 when the input is 10.7',
     () => {
-      const result = helperDelegate(10.7);
+      const result = this.helperDelegate(10.7);
+
       expect(result).toEqual(10.5);
     }
   );

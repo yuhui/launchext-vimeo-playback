@@ -1,5 +1,5 @@
 /**
- * Copyright 2022 Yuhui. All rights reserved.
+ * Copyright 2022-2023 Yuhui. All rights reserved.
  *
  * Licensed under the GNU General Public License, Version 3.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,17 +18,17 @@
 
 const proxyquire = require('proxyquire').noCallThru();
 
-describe('enableVideoPlaybackTracking action delegate', () => {
-  // mock turbine.logger
-  global.turbine = global.turbine || {
-    logger: jasmine.createSpyObj('', ['debug', 'info', 'warn', 'alert', 'error']),
-  };
-  
-  const getVimeoPlayerSdkSpyObj = require('../../specHelpers/getVimeoPlayerSdkSpyObj');
-  const vimeoPlayerSdkSpyObj = getVimeoPlayerSdkSpyObj();
+const mockTurbine = require('../../specHelpers/mockTurbine');
+const mockVimeoPlayerSdk = require('../../specHelpers/mockVimeoPlayerSdk');
 
-  const actionDelegate = proxyquire('../../../src/lib/actions/enableVideoPlaybackTracking', {
-    '../helpers/vimeoPlayerSdk': vimeoPlayerSdkSpyObj,
+describe('enableVideoPlaybackTracking action delegate', () => {
+  const vimeoPlayerSdk = mockVimeoPlayerSdk();
+
+  beforeAll(() => {
+    global.turbine = mockTurbine;
+    this.actionDelegate = proxyquire('../../../src/lib/actions/enableVideoPlaybackTracking', {
+      '../helpers/vimeoPlayerSdk': vimeoPlayerSdk,
+    });
   });
 
   beforeEach(() => {
@@ -37,13 +37,17 @@ describe('enableVideoPlaybackTracking action delegate', () => {
     this.event = {
       '$type': 'dom-ready',
     };
-    actionDelegate(this.settings, this.event);
+    this.actionDelegate(this.settings, this.event);
+  });
+
+  afterAll(() => {
+    delete global.turbine;
   });
 
   it(
     'calls the action from the vimeoPlayerSdk helper module once only',
     () => {
-      const result = vimeoPlayerSdkSpyObj.enableVideoPlaybackTracking;
+      const result = vimeoPlayerSdk.enableVideoPlaybackTracking;
       expect(result).toHaveBeenCalledOnceWith(this.settings);
     }
   );
