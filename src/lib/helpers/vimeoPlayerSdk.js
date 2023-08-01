@@ -161,6 +161,8 @@ var playerRegistry = {};
  * @param {String} options.error.message Vimeo error message.
  * @param {Number} options.error.method Vimeo method that caused the error.
  * @param {Number} options.error.name Vimeo error name.
+ * @param {Object} options.milestone (optional) Options related to video milestone tracking.
+ * @param {String} options.milestone.label Label to track with the video milestone.
  */
 var processEventType = function(eventType, player, nativeEvent, eventTriggers, options) {
   if (!eventTriggers || Object.keys(eventTriggers) === 0) {
@@ -195,7 +197,7 @@ var processEventType = function(eventType, player, nativeEvent, eventTriggers, o
          */
         stateData.videoCurrentTime = player.launchExt.playStopTime;
       }
-      stateData.videoMilestone = options.label;
+      stateData.videoMilestone = options.milestone.label;
       break;
   }
 
@@ -550,7 +552,9 @@ var findMilestone = function(player, currentTime) {
   currentMilestonesLabels.forEach(function(label) {
     var triggers = currentMilestones[label];
     var options = {
-      label: label,
+      milestone: {
+        label: label,
+      },
     };
 
     processEventType(VIDEO_MILESTONE, player, milestoneEvent, triggers, options);
