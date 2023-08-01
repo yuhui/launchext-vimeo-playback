@@ -163,6 +163,12 @@ var playerRegistry = {};
  * @param {Number} options.error.name Vimeo error name.
  * @param {Object} options.milestone (optional) Options related to video milestone tracking.
  * @param {String} options.milestone.label Label to track with the video milestone.
+ * @param {Array} options.additionalTriggers (optional) List of other triggers and their state
+ * data to fire with this Event Type.
+ * @param {Object} options.additionalTriggers[].stateData Object of state data for the additional
+ * triggers to use with this Event Type.
+ * @param {Array} options.additionalTriggers[].triggers Array of additional triggers to use with
+ * this Event Type.
  */
 var processEventType = function(eventType, player, nativeEvent, eventTriggers, options) {
   if (!eventTriggers || Object.keys(eventTriggers) === 0) {
@@ -736,7 +742,9 @@ var setupPlayer = function(element) {
   element.dataset.launchextSetup = PLAYER_SETUP_UPDATING_STATUS;
 
   // merge the triggers from all matching selectors into one
-  var triggers = {};
+  var triggers = {
+    _additionalTriggers: {},
+  };
   /**
    * triggers = {
    *   <string eventType> : [ trigger, trigger ],
@@ -749,6 +757,14 @@ var setupPlayer = function(element) {
    *       trigger: trigger,
    *     },
    *   ],
+   *   _additionalTriggers: {
+   *     <string eventType> : [
+   *       {
+   *         stateData: <object>,
+   *         triggers: [ trigger, trigger ],
+   *       },
+   *     ],
+   *   },
    * }
    */
 
