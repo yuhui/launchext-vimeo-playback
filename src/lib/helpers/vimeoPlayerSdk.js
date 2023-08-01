@@ -155,9 +155,12 @@ var playerRegistry = {};
  * @param {String} eventType The Event Type that has been triggered.
  * @param {Object} player The Vimeo player object.
  * @param {Object} nativeEvent The native Vimeo event object.
- * @param {Object} eventTriggers Array of triggers for this Event Type, or Object of milestones.
- * @param {Object} options (optional) Any options for this Event Type, e.g. error message,
- * milestone labels, etc.
+ * @param {Array} eventTriggers Array of triggers for this Event Type.
+ * @param {Object} options (optional) Any options for this Event Type.
+ * @param {Object} options.error (optional) Options related to Vimeo error reporting.
+ * @param {String} options.error.message Vimeo error message.
+ * @param {Number} options.error.method Vimeo method that caused the error.
+ * @param {Number} options.error.name Vimeo error name.
  */
 var processEventType = function(eventType, player, nativeEvent, eventTriggers, options) {
   if (!eventTriggers || Object.keys(eventTriggers) === 0) {
