@@ -100,6 +100,22 @@ module.exports = {
       "modulePath": "sandbox/logEventInfo.js",
       "settings": {}
     }]
+  }, {
+    "id": "RL1690103948497",
+    "name": "Video Playing",
+    "events": [{
+      "modulePath": "vimeo-playback/src/lib/events/videoPlaying.js",
+      "settings": {
+        "trackStarted": "no",
+        "trackResumed": "no",
+        "trackReplayed": "no",
+        "doNotTrack": "no"
+      }
+    }],
+    "actions": [{
+      "modulePath": "sandbox/logEventInfo.js",
+      "settings": {}
+    }]
   }],
   "property": {
     "name": "Sandbox property",
@@ -120,8 +136,8 @@ module.exports = {
   },
   "buildInfo": {
     "turbineVersion": "27.5.0",
-    "turbineBuildDate": "2023-04-22T09:40:37.361Z",
-    "buildDate": "2023-04-22T09:40:37.361Z",
+    "turbineBuildDate": "2023-07-23T09:19:35.052Z",
+    "buildDate": "2023-07-23T09:19:35.053Z",
     "environment": "development"
   }
 }
