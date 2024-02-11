@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.6.3 - 2024-02-09
+
+### Fixed
+
+- Resolved error that occurred with "Video Milestone" event.
+
 ## 2.6.2 - 2023-08-16
 
 ### Fixed
