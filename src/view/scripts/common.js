@@ -154,6 +154,18 @@ function valueIsInteger(value) {
     && parseInt(value, 10) === Number(value);
 }
 
+/** Expand or collapse an accordion */
+// eslint-disable-next-line no-unused-vars
+function toggleAccordion(id) {
+  const accordion = document.getElementById(id);
+  const accordionSelected = accordion.selected;
+  if (accordionSelected) {
+    accordion.removeAttribute('selected');
+  } else {
+    accordion.setAttribute('selected', '');
+  }
+}
+
 /** Show or hide an element based on the value of a form field */
 // eslint-disable-next-line no-unused-vars
 function toggleElement(formId, toggleField, toggleValue, selectorToToggle) {
