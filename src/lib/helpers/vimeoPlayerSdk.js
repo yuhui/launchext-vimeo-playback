@@ -422,11 +422,6 @@ var processPlaybackEvent = function(playbackEventType, player, nativeEvent) {
     case VIDEO_TIME_UPDATED:
       player.launchExt.previousUpdateTime = player.launchExt.videoUpdateTime;
 
-      player.launchExt.playStopTime = dataSeconds;
-      player.launchExt.videoCurrentTime = dataSeconds;
-      player.launchExt.videoDuration = dataDuration;
-      player.launchExt.videoUpdateTime = dataSeconds;
-
       /**
        * "timeupdate" triggers about once every 250ms -- or even less!
        * But a conscious decision is made to only act on the event about once every 500ms.
@@ -438,6 +433,11 @@ var processPlaybackEvent = function(playbackEventType, player, nativeEvent) {
       if (videoTimeDifference(dataSeconds, player.launchExt.previousUpdateTime) < 0.3) {
         break;
       }
+
+      player.launchExt.playStopTime = dataSeconds;
+      player.launchExt.videoCurrentTime = dataSeconds;
+      player.launchExt.videoDuration = dataDuration;
+      player.launchExt.videoUpdateTime = dataSeconds;
 
       isTimeUpdateVeryDifferent =
         videoTimeDifference(dataSeconds, player.launchExt.previousUpdateTime) > 1;
