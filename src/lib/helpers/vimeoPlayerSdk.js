@@ -608,13 +608,18 @@ var playerReady = function(event) {
     player.getVideoId(),
     player.getVideoTitle(),
     player.getVideoWidth(),
-    // special case: this throws an error if URL privacy is enabled by the video owner
     player.getVideoUrl(),
   ]).then(function(responses) {
     player.launchExt = player.launchExt || {};
 
     if (responses[0].status === 'fulfilled') {
       player.launchExt.isAutopaused = responses[0].value;
+      /**
+       * If an error is returned, then it means that the user's browser does not support the
+       * autopaused state. So player.launchExt.isAutopaused should be false.
+       * But player.launchExt.isAutopaused has already been initialised to false, so no further
+       * update is needed.
+       */
     }
     if (responses[1].status === 'fulfilled') {
       player.launchExt.playerColour = responses[1].value;
@@ -641,7 +646,7 @@ var playerReady = function(event) {
     if (responses[8].status === 'fulfilled') {
       player.launchExt.videoUrl = responses[8].value;
     } else {
-      // error occurred, probably due to URL privacy being enabled by the video owner
+      // error occurred, e.g. due to PrivacyError
       logger.debug('Video privacy setting prevents URL from being read, using fallback method');
       player.launchExt.videoUrl = 'https://vimeo.com/' + player.launchExt.videoId;
     }
