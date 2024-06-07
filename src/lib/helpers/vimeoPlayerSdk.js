@@ -108,7 +108,9 @@ var PLAYER_STOPPED_EVENT_TYPES = VIDEO_STOPPED_EVENT_TYPES.concat([
 ]);
 
 // constants related to setting up the Vimeo Player SDK
-var IFRAME_SELECTOR = 'iframe[src*=vimeo]';
+var IFRAME_ID_PREFIX = 'vimeoPlayback';
+var IFRAME_URL_PATTERN = 'vimeo';
+var IFRAME_SELECTOR = 'iframe[src*=' + IFRAME_URL_PATTERN + ']';
 var PLAYER_SETUP_MODIFIED_STATUS = 'modified';
 var PLAYER_SETUP_UPDATING_STATUS = 'updating';
 var PLAYER_SETUP_COMPLETED_STATUS = 'completed';
@@ -980,6 +982,8 @@ var setupPlayer = function(element) {
   playerRegistry[elementId] = player;
 
   element.dataset.launchextSetup = PLAYER_SETUP_COMPLETED_STATUS;
+
+  logger.info('Enabled video playback tracking for player ID ' + elementId);
 };
 
 /**
@@ -1048,7 +1052,17 @@ var registerPlayers = function(settings) {
   elements.forEach(function(element, i) {
     var playerElement;
     try  {
-      playerElement = registerPlayerElement(element, i, parametersToAdd);
+      playerElement = registerPlayerElement(
+        element,
+        i,
+        IFRAME_ID_PREFIX,
+        IFRAME_URL_PATTERN,
+        parametersToAdd
+      );
+
+      if (playerElement) {
+        logger.debug('Found Vimeo player with ID ' + playerElement.id);
+      }
     } catch (e) {
       logger.error(e, element);
       return;
