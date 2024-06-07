@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.7.0 - 2024-06-05
+
+### Changed
+
+- Refactor code for registering IFRAME elements.
+
+### Fixed
+
+- Verify that IFRAME elements have `src` attribute containing `"vimeo"`.
+
 ## 2.6.3 - 2024-02-09
 
 ### Fixed
