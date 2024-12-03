@@ -115,6 +115,7 @@ var PLAYER_SETUP_MODIFIED_STATUS = 'modified';
 var PLAYER_SETUP_UPDATING_STATUS = 'updating';
 var PLAYER_SETUP_COMPLETED_STATUS = 'completed';
 var PLAYER_SETUP_READY_STATUS = 'ready';
+var PLAYER_SETUP_REMOVED_STATUS = 'removed';
 var MAXIMUM_ATTEMPTS_TO_WAIT_FOR_VIDEO_PLATFORM_API = 5;
 var VIDEO_PLATFORM = 'vimeo';
 var VIMEO_PLAYER_SDK_URL = 'https://player.vimeo.com/api/player.js';
@@ -983,6 +984,10 @@ var setupPlayer = function(element) {
     playerRemoved(event, player);
   });
   observer.observe(element.parentNode, { childList: true });
+  observer.observe(element, {
+    attributeFilter: ['src'],
+    attributeOldValue: true,
+  });
 
   playerRegistry[elementId] = player;
 
@@ -1100,26 +1105,50 @@ var registerPlayers = function(settings) {
 /**
  * Detect when Vimeo players have been unloaded
  * - Observe changes to the DOM tree for removed players
+ * - Observe changes to the DOM element's "src" for non-player URL
  */
 var observer = new MutationObserver(function(mutationsList) {
   mutationsList.forEach(function(mutation) {
-    /**
-     * check for removedNodes only
-     * ignore other mutations
-     */
-    mutation.removedNodes.forEach(function(removedNode) {
-      var removedIframeNode = removedNode.nodeName.toLowerCase() === 'iframe';
-      var removedPlayer = removedNode.id && removedNode.id in playerRegistry;
-      if (removedIframeNode && removedPlayer) {
+    var removedElements = [];
+    switch (mutation.type) {
+      case 'attributes':
+        var isSrcAttribute = mutation.attributeName === 'src';
+        var oldValue = mutation.oldValue;
+        var oldValueWasPlayerUrl = oldValue && oldValue.indexOf(IFRAME_URL_PATTERN) > -1;
+        var newValue = mutation.target.getAttribute('src');
+        var newValueIsNotPlayerUrl = !newValue || newValue.indexOf(IFRAME_URL_PATTERN) === -1;
+
+        if (isSrcAttribute && oldValueWasPlayerUrl && newValueIsNotPlayerUrl) {
+          removedElements.push(mutation.target);
+        }
+        break;
+      case 'childList':
+        /**
+         * check for removedNodes only
+         * ignore other mutations
+         */
+        removedElements = mutation.removedNodes;
+        break;
+    }
+
+    if (removedElements.length === 0) {
+      return;
+    }
+
+    removedElements.forEach(function(removedElement) {
+      var removedElementIsIframe = removedElement.nodeName.toLowerCase() === 'iframe';
+      var removedElementIsRegistered = removedElement.id && removedElement.id in playerRegistry;
+      if (removedElementIsIframe && removedElementIsRegistered) {
         var removeEvent = new Event('remove');
 
         /**
-         * the next line calls the event listener that was added to the element (removedNode) in
-         * registerPlayers().
-         */
-        removedNode.dispatchEvent(removeEvent);
+        * the next line calls the event listener that was added to the element (removedElement) in
+        * registerPlayers().
+        */
+        removedElement.dispatchEvent(removeEvent);
+        removedElement.dataset.launchextSetup = PLAYER_SETUP_REMOVED_STATUS;
 
-        delete playerRegistry[removedNode.id];
+        delete playerRegistry[removedElement.id];
         observer.disconnect();
       }
     });
