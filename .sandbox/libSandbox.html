@@ -38,6 +38,8 @@
   <p>
     <span style="color:blue;text-decoration: underline;" onclick="showVideo();">Show video</span>
     &nbsp;&nbsp;&nbsp;
+    <span style="color:blue;text-decoration: underline;" onclick="removeVideoUrl();">Remove video URL</span>
+    &nbsp;&nbsp;&nbsp;
     <span style="color:blue;text-decoration: underline;" onclick="removeVideo();">Remove video</span>
   </p>
   <div id="dynamicPlayer"></div>
@@ -63,6 +65,11 @@
       videoFrame.setAttribute('height', '360');
       videoFrame.setAttribute('src', `https://player.vimeo.com/video/${VIDEO_ID}?h=${HASH}`);
       DYNAMIC_PLAYER.appendChild(videoFrame);
+    }
+
+    function removeVideoUrl() {
+      let videoFrame = DYNAMIC_PLAYER.querySelector('iframe');
+      videoFrame.removeAttribute('src');
     }
 
     function removeVideo() {
