@@ -1044,6 +1044,7 @@ var registerPlayers = function(settings) {
   var iframeSelector = elementSpecificitySetting === 'specific' && elementsSelectorSetting
     ? elementsSelectorSetting
     : IFRAME_SELECTOR;
+  var parametersExclusionSetting = settings.parametersExclusion || [];
 
   var elements = document.querySelectorAll(iframeSelector);
   var numElements = elements.length;
@@ -1057,7 +1058,7 @@ var registerPlayers = function(settings) {
   }
 
   // compile the list of required parameters to add to the IFrame's src URL
-  var parametersToAdd = {};
+  var parametersToAdd = [];
 
   elements.forEach(function(element, i) {
     var playerElement;
