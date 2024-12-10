@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.8.0 - 2024-12-06
+
+### Added
+
+- Detect changes to the IFRAME element's `src` attribute to trigger "Player Removed" event.
+
 ## 2.7.0 - 2024-06-05
 
 ### Changed
