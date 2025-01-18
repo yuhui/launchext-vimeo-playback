@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.9.0 - 2025-01-17
+
+### Added
+
+- Improve milestone tracking by setting the next milestone from the current time to lookup later, instead of detecting milestones during each time update.
+
 ## 2.8.0 - 2024-12-06
 
 ### Added
