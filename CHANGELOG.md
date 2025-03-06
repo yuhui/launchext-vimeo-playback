@@ -1,5 +1,21 @@
 # Changelog
 
+## 2.10.1 - 2025-02-28
+
+### Fixed
+
+- Do not process "Player Ready" event if the other event that is being processed is "Player Removed".
+
+## 2.10.0 (merged with 2.10.1) - 2025-02-28
+
+### Changed
+
+- Process "Player Ready" event if another event is being processed when the `ready()` method had failed to run for this `player` object.
+
+### Fixed
+
+- Check that next milestone exists before getting its time.
+
 ## 2.9.0 - 2025-01-17
 
 ### Added
