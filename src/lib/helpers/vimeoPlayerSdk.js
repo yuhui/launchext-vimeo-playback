@@ -30,6 +30,8 @@ var videoTimeDifference = require('./videoTimeDifference');
 
 var logger = turbine.logger;
 
+var __VERSION__ = '2.10.2';
+
 // constants related to Event Types used in this extension
 var PLAYBACK_RATE_CHANGED = 'playback rate changed';
 var PLAYER_ERROR = 'player error';
