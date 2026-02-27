@@ -942,6 +942,10 @@ var setupPlayer = function(element) {
   });
 
   player.on('play', function(data) {
+    if (!data) {
+      return;
+    }
+
     processPlaybackEvent(VIDEO_PLAYING, player, {
       data: data,
       target: player,
