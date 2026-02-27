@@ -23,6 +23,7 @@ var Promise = require('@adobe/reactor-promise');
 
 var compileMilestones = require('./compileMilestones');
 var createGetVideoEvent = require('./createGetVideoEvent');
+var findMilestone = require('./findMilestone');
 var getVideoStateData = require('./getVideoStateData');
 var flooredVideoTime = require('./flooredVideoTime');
 var registerPlayerElement = require('./registerPlayerElement');
@@ -341,7 +342,7 @@ var processPlaybackEvent = function(playbackEventType, player, nativeEvent) {
 
   // these 2 variables are used in VIDEO_TIME_UPDATED
   var isTimeUpdateVeryDifferent;
-  var currentTimeUpdateTime;
+  // var currentTimeUpdateTime;
 
   /**
    * When the user skips in the video while it is playing, the normal event sequence is:
@@ -471,8 +472,37 @@ var processPlaybackEvent = function(playbackEventType, player, nativeEvent) {
        * need to get static value of the current time
        * because it could be updated before findMilestone() has run or completed
        */
+      /*
       currentTimeUpdateTime = parseFloat(JSON.parse(JSON.stringify(player.launchExt.playStopTime)));
       findMilestone(player, currentTimeUpdateTime);
+      */
+
+      findMilestone(player, function (foundMilestone) {
+        if (!foundMilestone) {
+          return;
+        }
+  
+        /**
+         * Create a new "native" event for the milestone.
+         */
+        var milestoneEvent = {
+          target: player,
+        };
+  
+        var fixedMilestoneTriggers = player.launchExt.triggers[VIDEO_MILESTONE].fixed;
+        var milestoneLabelsAndTriggers = fixedMilestoneTriggers[foundMilestone];
+        var milestonesLabels = Object.keys(milestoneLabelsAndTriggers);
+        milestonesLabels.forEach(function(label) {
+          var triggers = milestoneLabelsAndTriggers[label];
+          var options = {
+            milestone: {
+              label: label,
+            },
+          };
+
+          processEventType(VIDEO_MILESTONE, player, milestoneEvent, triggers, options);
+        });
+      });
 
       break;
     case VIDEO_VOLUME_CHANGED:
@@ -560,66 +590,6 @@ var processPlaybackEvent = function(playbackEventType, player, nativeEvent) {
 
       break;
   }
-
-/**
- * Check if a video milestone for the specified Vimeo player has been reached.
- *
- * At the end, call setNextMilestone(), then call itself recursively in case the next milestone
- * has been passed too.
- *
- * @param {Object} player The Vimeo player object.
- * @param {Number} currentTime The video's current time when checking for a milestone.
- */
-var findMilestone = function(player, currentTime) {
-  var nextMilestone = player.launchExt.nextMilestone;
-  if (!nextMilestone) {
-    // no next milestone, so there's nothing to do
-    return;
-  }
-  var nextMilestoneTime = nextMilestone.time;
-  if (nextMilestoneTime > currentTime) {
-    // next milestone has not passed yet, so there's nothing to do
-    return;
-  }
-
-  /**
-   * If we can reach here, then it implies that player.launchExt.triggers exists,
-   * so no need to check for its existence.
-   */
-
-  var fixedMilestoneTriggers = player.launchExt.triggers[VIDEO_MILESTONE].fixed;
-  var milestoneLabelsAndTriggers = fixedMilestoneTriggers[nextMilestoneTime];
-
-  /**
-   * Create a new "native" event for the milestone.
-   */
-  var milestoneEvent = {
-    target: player,
-  };
-
-  var milestonesLabels = Object.keys(milestoneLabelsAndTriggers);
-  milestonesLabels.forEach(function(label) {
-    var triggers = milestoneLabelsAndTriggers[label];
-    var options = {
-      milestone: {
-        label: label,
-      },
-    };
-
-    processEventType(VIDEO_MILESTONE, player, milestoneEvent, triggers, options);
-  });
-
-  /**
-   * Video time is measured in multiples of 0.5 seconds.
-   * So find the next milestone that is more than 0.5 seconds after this milestone
-   */
-  setNextMilestone(player, nextMilestoneTime + 0.5);
-
-  /**
-   * Call findMilestone() again in case the currentTime is still greater than the subsequent
-   * milestone.
-   */
-  findMilestone(player, currentTime);
 };
 
 /**
