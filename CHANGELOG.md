@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.10.3 - 2026-03-03
+
+### Fixed
+
+- Don't track "Video Playing" event if user had seeked (click at another point in the video's timeline while the video is playing), because Vimeo doesn't return any data with that event when seeking. Workaround: Track with "Video Seeked" event instead.
+
+### Changed
+
+- Improve milestone tracking by finding a milestone between the previous update time and the current time.
+
 ## 2.10.2 - 2025-03-14
 
 ### Fixed
